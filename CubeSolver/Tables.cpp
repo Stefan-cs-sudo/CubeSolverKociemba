@@ -13,79 +13,71 @@ using namespace std;
 
 Tables::Tables()
 {
-
+	
 	TwistMove.resize(2187 * 18);
 	FlipMove.resize(2048 * 18);
 	UDSliceMove.resize(495 * 18);
-	CPMove.resize(40320);
-	EPMove.resize(40320);
-	Slice_EP_Prun.resize(2187 * 18);
+	UDSlicePhase2Move.resize(24 * 18); 
+	CPMove.resize(40320 * 18);         
+	EPMove.resize(40320 * 18);       
+
+	Twist_Flip_Prun.resize(2187 * 2048);
+	Slice_Twist_Prun.resize(495 * 2187);
+	Slice_Flip_Prun.resize(495 * 2048);
+	Slice_CP_Prun.resize(40320 * 24);
+	Slice_EP_Prun.resize(40320 * 24);
 
 	FILE* file = fopen("kociemba_tables.bin", "rb");
 	if (file != NULL) {
-
-		fread(TwistMove.data(), sizeof(short), TwistMove.size(), file);
-		fread(FlipMove.data(), sizeof(short), FlipMove.size(), file);
-		fread(UDSliceMove.data(), sizeof(short), UDSliceMove.size(), file);
-		fread(CPMove.data(), sizeof(short), CPMove.size(), file);
-		fread(EPMove.data(), sizeof(short), EPMove.size(), file);
-		fread(Slice_Twist_Prun.data(), sizeof(short), Slice_Twist_Prun.size(), file);
-		fread(Slice_Flip_Prun.data(), sizeof(short), Slice_Flip_Prun.size(), file);
-		fread(Slice_CP_Prun.data(), sizeof(short), Slice_CP_Prun.size(), file);
-		fread(Slice_EP_Prun.data(), sizeof(short), Slice_EP_Prun.size(), file);
-
+		fread(TwistMove.data(), sizeof(int), TwistMove.size(), file);
+		fread(FlipMove.data(), sizeof(int), FlipMove.size(), file);
+		fread(UDSliceMove.data(), sizeof(int), UDSliceMove.size(), file);
+		fread(UDSlicePhase2Move.data(), sizeof(int), UDSlicePhase2Move.size(), file);
+		fread(CPMove.data(), sizeof(int), CPMove.size(), file);
+		fread(EPMove.data(), sizeof(int), EPMove.size(), file);
+		fread(Slice_Twist_Prun.data(), sizeof(uint8_t), Slice_Twist_Prun.size(), file);
+		fread(Slice_Flip_Prun.data(), sizeof(uint8_t), Slice_Flip_Prun.size(), file);
+		fread(Twist_Flip_Prun.data(), sizeof(uint8_t), Twist_Flip_Prun.size(), file);
+		fread(Slice_CP_Prun.data(), sizeof(uint8_t), Slice_CP_Prun.size(), file);
+		fread(Slice_EP_Prun.data(), sizeof(uint8_t), Slice_EP_Prun.size(), file);
 
 		fclose(file);
+		cout << "Tabelele au fost incarcate cu succes din fisier!\n";
 	}
 	else {
-		cout << "Nu s-au gasit tabelele necesare pentru rezolvarea rapida \n";
-		cout << "Trebuie generate toate  tabelele:\n";
-		cout << "Vrei sa se genereze tabele noi( asigura-te ca tabelele nu sunt create deja in alta parte ,daca sunt doar muta-le  in folder-ul programului ) cele vechi o sa fie sterse ";
-		cout << endl << " Y/N?\n";
+		cout << "Nu s-au gasit tabelele necesare pentru rezolvarea rapida.\n";
+		cout << "Vrei sa se genereze tabele noi? (Y/N)\n";
 		string answer;
 		cin >> answer;
-		if (answer == "y" || answer == "Y")
-		{
-
+		if (answer == "y" || answer == "Y") {
+			BuildingTables(); 
 
 			FILE* file = fopen("kociemba_tables.bin", "wb");
 			if (file != NULL) {
-
-				fwrite(TwistMove.data(), sizeof(short), TwistMove.size(), file);
-				fwrite(FlipMove.data(), sizeof(short), FlipMove.size(), file);
-				fwrite(UDSliceMove.data(), sizeof(short), UDSliceMove.size(), file);
-				fwrite(CPMove.data(), sizeof(short), CPMove.size(), file);
-				fwrite(EPMove.data(), sizeof(short), EPMove.size(), file);
-				fwrite(Slice_Twist_Prun.data(), sizeof(short), Slice_Twist_Prun.size(), file);
-				fwrite(Slice_Flip_Prun.data(), sizeof(short), Slice_Flip_Prun.size(), file);
-				fwrite(Slice_CP_Prun.data(), sizeof(short), Slice_CP_Prun.size(), file);
-				fwrite(Slice_EP_Prun.data(), sizeof(short), Slice_EP_Prun.size(), file);
-
-
+				fwrite(TwistMove.data(), sizeof(int), TwistMove.size(), file);
+				fwrite(FlipMove.data(), sizeof(int), FlipMove.size(), file);
+				fwrite(UDSliceMove.data(), sizeof(int), UDSliceMove.size(), file);
+				fwrite(UDSlicePhase2Move.data(), sizeof(int), UDSlicePhase2Move.size(), file);
+				fwrite(CPMove.data(), sizeof(int), CPMove.size(), file);
+				fwrite(EPMove.data(), sizeof(int), EPMove.size(), file);
+				fwrite(Slice_Twist_Prun.data(), sizeof(uint8_t), Slice_Twist_Prun.size(), file);
+				fwrite(Slice_Flip_Prun.data(), sizeof(uint8_t), Slice_Flip_Prun.size(), file);
+				fwrite(Twist_Flip_Prun.data(), sizeof(uint8_t), Twist_Flip_Prun.size(), file);
+				fwrite(Slice_CP_Prun.data(), sizeof(uint8_t), Slice_CP_Prun.size(), file);
+				fwrite(Slice_EP_Prun.data(), sizeof(uint8_t), Slice_EP_Prun.size(), file);
 				fclose(file);
 			}
 		}
-		else
-		{
-			cout << "nu s-au generat tabele";
-
-
-		}
 	}
-	//exista fisiere necesare?
-
-
-	
-
-	}
+}
 
 void Tables::BuildTwistMove() {
-	Cubie cub;
-	cub.initMoves();
+	
 	for (int i = 0; i < 2187; i++)
 	{
-		for (int m = Moves::U1; m < Moves::F3; m++)
+		for (int m = 0; m < 18; m++)
 		{
+			Cubie cub;
 			cub.setTwistCoord(i);
 			cub.applyMove(Cubie::Mutari[m]);
 
@@ -100,12 +92,13 @@ void Tables::BuildTwistMove() {
 
 void Tables::BuildFlipMove()
 {
-	Cubie cub;
-	cub.initMoves();
+
+
 	for (size_t i = 0; i < 2048; i++)
 	{
-		for (int m = Moves::U1; m < Moves::F3; m++)
+		for (int m = 0; m < 18; m++)
 		{
+			Cubie cub;
 			cub.setFlipCoord(i);
 			cub.applyMove(Cubie::Mutari[m]);
 
@@ -121,12 +114,12 @@ void Tables::BuildFlipMove()
 void Tables::BuildUDSliceMove()
 {
 
-	Cubie cub;
-	cub.initMoves();
+	
 	for (size_t i = 0; i < 495; i++)
 	{
-		for (int m = Moves::U1; m < Moves::F3; m++)
+		for (int m = 0; m < 18; m++)
 		{
+			Cubie cub;
 			cub.setUDSliceCoord(i);
 			cub.applyMove(Cubie::Mutari[m]);
 
@@ -142,12 +135,12 @@ void Tables::BuildUDSliceMove()
 
 void Tables::BuildCPMove()
 {
-	Cubie cub;
-	cub.initMoves();
+	
 	for (size_t i = 0; i < 40320; i++)
 	{
-		for (size_t m = Moves::U1; m < Moves::F3; m++)
+		for (int m = 0; m < 18; m++)
 		{
+			Cubie cub;
 			cub.setCPCoord(i);
 			cub.applyMove(Cubie::Mutari[m]);
 			CPMove[18 * i + m] = cub.getCPCoord();
@@ -162,12 +155,12 @@ void Tables::BuildCPMove()
 
 void Tables::BuildEPMove()
 {
-	Cubie cub;
-	cub.initMoves();
+
 	for (size_t i = 0; i < 40320; i++)
 	{
-		for (size_t m = Moves::U1; m < Moves::F3; m++)
+		for (int m = 0; m < 18; m++)
 		{
+			Cubie cub;
 			cub.setEPCoord(i);
 			cub.applyMove(Cubie::Mutari[m]);
 			EPMove[18 * i + m] = cub.getEPCoord();
@@ -176,252 +169,223 @@ void Tables::BuildEPMove()
 	}
 }
 
-
-void Tables::BuildSlice_Twist_Prun()
-{
-
-	int totalStates = 495 * 2187;
-	Slice_Twist_Prun.resize(totalStates);
-
-
-	for (int i = 0; i < totalStates; i++) {
-		Slice_Twist_Prun[i] = -1;
-	}
-
-
+void Tables::BuildSlice_Twist_Prun() {
+	const int totalStates = 495 * 2187;
+	Slice_Twist_Prun.assign(totalStates, 255);
 	Slice_Twist_Prun[0] = 0;
 
 	int depth = 0;
 	int done = 1;
 
-	cout << "Generam Slice_Twist_Prun..." << endl;
-
-
+	std::cout << "Generam Slice_Twist_Prun...\n";
 	while (done < totalStates) {
-
 		for (int i = 0; i < totalStates; i++) {
-
-
 			if (Slice_Twist_Prun[i] == depth) {
-
-
 				int slice = i / 2187;
 				int twist = i % 2187;
 
-
 				for (int m = 0; m < 18; m++) {
-
-
 					int newSlice = UDSliceMove[slice * 18 + m];
 					int newTwist = TwistMove[twist * 18 + m];
-
-
 					int newIndex = newSlice * 2187 + newTwist;
 
-
-					if (Slice_Twist_Prun[newIndex] == -1)
-					{
-
-						Slice_Twist_Prun[newIndex] = depth + 1;
+					if (Slice_Twist_Prun[newIndex] == 255) {
+						Slice_Twist_Prun[newIndex] = (uint8_t)(depth + 1);
 						done++;
 					}
 				}
 			}
 		}
 		depth++;
-		cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari." << endl;
+		std::cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
 	}
 }
-
-void Tables::BuildSlice_Flip_Prun()
-{
-
-
-	int totalStates = 495 * 2048;
-	Slice_Flip_Prun.resize(totalStates);
-
-
-	for (int i = 0; i < totalStates; i++) {
-		Slice_Flip_Prun[i] = -1;
-	}
-
-
+void Tables::BuildSlice_Flip_Prun() {
+	const int totalStates = 495 * 2048;
+	Slice_Flip_Prun.assign(totalStates, 255);
 	Slice_Flip_Prun[0] = 0;
 
 	int depth = 0;
 	int done = 1;
 
-	cout << "Generam Slice_Twist_Prun..." << endl;
-
-
+	std::cout << "Generam Slice_Flip_Prun...\n";
 	while (done < totalStates) {
-
 		for (int i = 0; i < totalStates; i++) {
-
-
 			if (Slice_Flip_Prun[i] == depth) {
-
-
 				int slice = i / 2048;
-				int twist = i % 2048;
-
+				int flip = i % 2048;
 
 				for (int m = 0; m < 18; m++) {
-
-
 					int newSlice = UDSliceMove[slice * 18 + m];
-					int newTwist = FlipMove[twist * 18 + m];
+					int newFlip = FlipMove[flip * 18 + m];
+					int newIndex = newSlice * 2048 + newFlip;
 
-
-					int newIndex = newSlice * 2048 + newTwist;
-
-
-					if (Slice_Flip_Prun[newIndex] == -1) {
-
-						Slice_Flip_Prun[newIndex] = depth + 1;
+					if (Slice_Flip_Prun[newIndex] == 255) {
+						Slice_Flip_Prun[newIndex] = (uint8_t)(depth + 1);
 						done++;
 					}
 				}
 			}
 		}
 		depth++;
-		cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari." << endl;
+		std::cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
 	}
-
-
 }
+void Tables::BuildTwist_Flip_Prun()
+{
+	const int totalStates = 2187 * 2048;
+	Twist_Flip_Prun.assign(totalStates, 255);
+	Twist_Flip_Prun[0] = 0;
 
+	int depth = 0;
+	int done = 1;
+
+	std::cout << "Generam Twist_Flip_Prun...\n";
+
+	while (done < totalStates) {
+		for (int i = 0; i < totalStates; i++) {
+			if (Twist_Flip_Prun[i] == depth) {
+				int twist = i / 2048;
+				int flip = i % 2048;
+
+				for (int m = 0; m < 18; m++) {
+					int newTwist = TwistMove[twist * 18 + m];
+					int newFlip = FlipMove[flip * 18 + m];
+					int newIndex = newTwist * 2048 + newFlip;
+
+					if (Twist_Flip_Prun[newIndex] == 255) {
+						Twist_Flip_Prun[newIndex] = (uint8_t)(depth + 1);
+						done++;
+					}
+				}
+			}
+		}
+		depth++;
+		std::cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
+	}
+}
 
 void Tables::BuildUDSlicePhase2Move()
 {
 	UDSlicePhase2Move.resize(24 * 18);
-	Cubie cub;
-	cub.initMoves();
+	
 
-	for (int i = 0; i < 24; i++)
-	{
-		for (int m = Moves::U1; m <= Moves::B3; m++)
-		{
+	for (int i = 0; i < 24; i++) {
+		for (int m = 0; m < 18; m++) { 
+			Cubie cub;
 			cub.setUDSlicePhase2Coord(i);
 			cub.applyMove(Cubie::Mutari[m]);
-
 			UDSlicePhase2Move[18 * i + m] = cub.getUDSlicePhase2Coord();
 		}
 	}
 
 }
-
-
 void Tables::BuildSlice_CP_Prun()
 {
-	int totalStates = 40320 * 24;
-	Slice_CP_Prun.resize(totalStates);
+	const int totalStates = 40320 * 24;
 
-	for (int i = 0; i < totalStates; i++) {
-		Slice_CP_Prun[i] = -1;
-	}
-
+	// toate = 255 (neatins)
+	Slice_CP_Prun.assign(totalStates, 255);
 	Slice_CP_Prun[0] = 0;
+
 	int depth = 0;
 	int done = 1;
+	int last_done = 0;
 
-	cout << "Generam Slice_CP_Prun (Faza 2)..." << endl;
-
+	std::cout << "Generam Slice_CP_Prun (Faza 2)...\n";
 
 	int phase2Moves[10] = { Moves::U1, Moves::U2, Moves::U3,
-						   Moves::D1, Moves::D2, Moves::D3,
-						   Moves::R2, Moves::L2, Moves::F2, Moves::B2 };
+							Moves::D1, Moves::D2, Moves::D3,
+							Moves::R2, Moves::L2, Moves::F2, Moves::B2 };
 
-	while (done < totalStates) {
+	while (done < totalStates && done > last_done) {
+		last_done = done;
+
 		for (int i = 0; i < totalStates; i++) {
-
 			if (Slice_CP_Prun[i] == depth) {
-
 				int slice = i / 40320;
 				int cp = i % 40320;
 
-
-				for (int mIndex = 0; mIndex < 10; mIndex++) {
-					int m = phase2Moves[mIndex];
-
+				for (int mi = 0; mi < 10; mi++) {
+					int m = phase2Moves[mi];
 
 					int newSlice = UDSlicePhase2Move[slice * 18 + m];
 					int newCP = CPMove[cp * 18 + m];
-
 					int newIndex = newSlice * 40320 + newCP;
 
-					if (Slice_CP_Prun[newIndex] == -1) {
-						Slice_CP_Prun[newIndex] = depth + 1;
+					if (Slice_CP_Prun[newIndex] == 255) {
+						Slice_CP_Prun[newIndex] = (uint8_t)(depth + 1);
 						done++;
 					}
 				}
 			}
 		}
+
 		depth++;
-		cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari." << endl;
+		std::cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
 	}
-}
-
-
-void Tables::BuildSlice_EP_Prun()
+}void Tables::BuildSlice_EP_Prun()
 {
+	const int totalStates = 40320 * 24;
 
-
-	int totalStates = 40320 * 24;
-	Slice_EP_Prun.resize(totalStates);
-
-	for (int i = 0; i < totalStates; i++) {
-		Slice_EP_Prun[i] = -1;
-	}
-
+	Slice_EP_Prun.assign(totalStates, 255);
 	Slice_EP_Prun[0] = 0;
+
 	int depth = 0;
 	int done = 1;
+	int last_done = 0;
 
-	cout << "Generam Slice_CP_Prun (Faza 2)..." << endl;
-
+	std::cout << "Generam Slice_EP_Prun (Faza 2)...\n";
 
 	int phase2Moves[10] = { Moves::U1, Moves::U2, Moves::U3,
-						   Moves::D1, Moves::D2, Moves::D3,
-						   Moves::R2, Moves::L2, Moves::F2, Moves::B2 };
+							Moves::D1, Moves::D2, Moves::D3,
+							Moves::R2, Moves::L2, Moves::F2, Moves::B2 };
 
-	while (done < totalStates) {
+	while (done < totalStates && done > last_done) {
+		last_done = done;
+
 		for (int i = 0; i < totalStates; i++) {
-
-			if (Slice_CP_Prun[i] == depth) {
-
+			if (Slice_EP_Prun[i] == depth) {
 				int slice = i / 40320;
 				int ep = i % 40320;
 
-
-				for (int mIndex = 0; mIndex < 10; mIndex++) {
-					int m = phase2Moves[mIndex];
-
+				for (int mi = 0; mi < 10; mi++) {
+					int m = phase2Moves[mi];
 
 					int newSlice = UDSlicePhase2Move[slice * 18 + m];
-					int newCP = EPMove[ep * 18 + m];
+					int newEP = EPMove[ep * 18 + m];
+					int newIndex = newSlice * 40320 + newEP;
 
-					int newIndex = newSlice * 40320 + newCP;
-
-					if (Slice_EP_Prun[newIndex] == -1) {
-						Slice_EP_Prun[newIndex] = depth + 1;
+					if (Slice_EP_Prun[newIndex] == 255) {
+						Slice_EP_Prun[newIndex] = (uint8_t)(depth + 1);
 						done++;
 					}
 				}
 			}
 		}
+
 		depth++;
-		cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari." << endl;
+		std::cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
 	}
-
-
 }
-
 
 void Tables::BuildingTables()
 {
+	cout << "Asteapta, se genereaza tabelele... (Va dura cateva minute)\n";
+
+	Cubie setup;
+	setup.initMoves(); 
+
 	BuildTwistMove();
+	BuildFlipMove();
+	BuildUDSliceMove();
+	BuildUDSlicePhase2Move();
+	BuildCPMove();
+	BuildEPMove();
 
-
-
+	BuildSlice_Twist_Prun();
+	BuildSlice_Flip_Prun();
+	BuildTwist_Flip_Prun();
+	BuildSlice_CP_Prun();
+	BuildSlice_EP_Prun();
 }

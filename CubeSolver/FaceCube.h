@@ -19,6 +19,7 @@ class FaceCube {
 public:
    
 
-    void  Facelets(string scrambledCube);
+    void Facelets(const std::string& scrambledCube);
     Cubie toCubieCube();
+
 };

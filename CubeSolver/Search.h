@@ -11,18 +11,17 @@
 using namespace std;
 
 class Search {
-    
-    vector<int> currentPath;
+    std::vector<int> currentPath;
+    uint64_t nodes1 = 0, nodes2 = 0;
+
+    static constexpr int MAXD = 32;
+    int twistS[MAXD], flipS[MAXD], sliceS[MAXD];
+    int cpS[MAXD], epS[MAXD], slice2S[MAXD];
 
 public:
-    Search() {}
-
-    
-    void solve(CoordCube cc);
+    string solve(CoordCube cc);
 
 private:
-   
-    bool searchPhase1(CoordCube node, int depthToGoal, int lastMove);
-
-    bool searchPhase2(CoordCube node, int depthToGoal, int lastMove);
+    bool searchPhase1(int depth, int depthToGoal, int lastMove, int prevMove);
+    bool searchPhase2(int depth, int depthToGoal, int lastMove);
 };

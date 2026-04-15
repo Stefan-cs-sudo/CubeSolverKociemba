@@ -23,7 +23,7 @@ class Cubie
     uint8_t EdgeOrientation[12] = {};
 
 
-     static Cubie Mutari[18];
+    static Cubie Mutari[18];
      Cubie();
 
 
@@ -49,7 +49,7 @@ class Cubie
 
     int getUDSliceCoord();
 
-    int factorial(int n);
+   
 
     int getCPCoord();
     

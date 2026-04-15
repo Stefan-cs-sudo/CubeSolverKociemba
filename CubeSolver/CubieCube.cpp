@@ -2,7 +2,7 @@
 #include"CubieCube.h"
 
 
-
+Cubie Cubie::Mutari[18];
 
 Cubie::Cubie()
 {
@@ -367,11 +367,10 @@ void Cubie::initMoves()
 
     Mutari[Moves::D1] = D1;
 
-
     Cubie D2;
 
     D2.CornerPermutation[DRF] = DLB;
-    D2.CornerPermutation[DLB] = DLF;
+    D2.CornerPermutation[DLB] = DRF;
     D2.CornerPermutation[DRB] = DLF;
     D2.CornerPermutation[DLF] = DRB;
 
@@ -390,9 +389,7 @@ void Cubie::initMoves()
     D2.EdgeOrientation[DB] = 0;
     D2.EdgeOrientation[DL] = 0;
 
-
     Mutari[Moves::D2] = D2;
-
 
     Cubie D3;
 
@@ -531,21 +528,17 @@ void  Cubie::multiply(Cubie mul)
 }
 
 
-
-int Cubie::getTwistCoord()
-{
+int Cubie::getTwistCoord() {
     int twist = 0;
-    for (int i = URF; i < DRB; i++) {
+    for (int i = 0; i < 7; i++) { 
         twist = 3 * twist + CornerOrientation[i];
     }
     return twist;
 }
 
-int Cubie::getFlipCoord()
-{
+int Cubie::getFlipCoord() {
     int flip = 0;
-
-    for (int i = 0; i < 11; i++) {
+    for (int i = 0; i < 11; i++) { 
         flip = 2 * flip + EdgeOrientation[i];
     }
     return flip;
@@ -562,48 +555,26 @@ int Cubie::combinations(int n, int k)
     }
     return c;
 }
-
-int Cubie::getUDSliceCoord()
-{
+int Cubie::getUDSliceCoord() {
     int UDSliceCoord = 0;
     int k = 3;
-
-
     for (int i = 11; i >= 0; i--) {
-
-
-        if (EdgePermutation[i] >= FR && EdgePermutation[i] <= BR) {
+      
+        if (EdgePermutation[i] >= 8 && EdgePermutation[i] <= 11) {
             k--;
         }
         else {
-
             UDSliceCoord += combinations(i, k);
         }
     }
-
     return UDSliceCoord;
 }
-int Cubie::factorial(int n)
-{
-    if (n < 0)
-        return 0;
-    else if (n == 0)
-        return 1;
-    else
-    {
-        int rez = 0;
-        for (int i = 1; i <= n; i++)
-        {
-            rez *= i;
-        }
-        return rez;
-    }
-}
+
 
 int Cubie::getCPCoord()
 {
     int CPCoord = 0;
-    for (int i = Corners::DRB; i >= Corners::URF; i--)
+    for (int i = Corners::DRB; i > Corners::URF; i--)
     {
         int distance = 0;
 
@@ -612,8 +583,9 @@ int Cubie::getCPCoord()
             if (CornerPermutation[j] > CornerPermutation[i])
                 distance++;
         }
-        CPCoord += (CPCoord + distance) * i;
+        CPCoord = (CPCoord + distance) * i;
     }
+ 
     return CPCoord;
 
 }
@@ -621,7 +593,7 @@ int Cubie::getCPCoord()
 int Cubie::getEPCoord()
 {
     int EPCoord = 0;
-    for (int i = Edges::BR; i >= Edges::UR; i--)
+    for (int i = Edges::DB; i > Edges::UR; i--)
     {
         int distance = 0;
 
@@ -630,7 +602,7 @@ int Cubie::getEPCoord()
             if (EdgePermutation[j] > EdgePermutation[i])
                 distance++;
         }
-        EPCoord += (EPCoord + distance) * i;
+        EPCoord = (EPCoord + distance) * i;
     }
     return EPCoord;
 
@@ -652,55 +624,41 @@ int Cubie::getUDSlicePhase2Coord()
     }
     return x;
 }
-
-void Cubie::setTwistCoord(int twistToUnpack)
-{
-    int paritySum = 0;
-
-    for (int t = DRB; t > URF; t--) {
-        CornerOrientation[t] = twistToUnpack % 3;
-        paritySum += CornerOrientation[t];
-        twistToUnpack /= 3;
+void Cubie::setTwistCoord(int twist) {
+    int parity = 0;
+    for (int i = 6; i >= 0; i--) {
+        CornerOrientation[i] = twist % 3;
+        parity += CornerOrientation[i];
+        twist /= 3;
     }
-
-    CornerOrientation[URF] = (3 - (paritySum % 3)) % 3;
+    CornerOrientation[7] = (3 - parity % 3) % 3; 
 }
 
-void Cubie::setFlipCoord(int FlipToUnpack)
-{
-    int paritySum = 0;
 
-    for (int t = BR; t > UR; t--) {
-        EdgeOrientation[t] = FlipToUnpack % 2;
-        paritySum += EdgeOrientation[t];
-        FlipToUnpack /= 2;
+void Cubie::setFlipCoord(int flip) {
+    int parity = 0;
+    for (int i = 10; i >= 0; i--) {
+        EdgeOrientation[i] = flip % 2;
+        parity += EdgeOrientation[i];
+        flip /= 2;
     }
-
-    EdgeOrientation[UR] = (2 - (paritySum % 2)) % 2;
+    EdgeOrientation[11] = (2 - parity % 2) % 2; 
 }
 
-void Cubie::setUDSliceCoord(int index)
-{
+void Cubie::setUDSliceCoord(int index) {
     int k = 3;
-
-
-    int sliceEdges[4] = { FR, FL, BL, BR };
-    int otherEdges[8] = { UR, UF, UL, UB, DR, DF, DL, DB };
-
+    int sliceEdges[4] = { 8, 9, 10, 11 }; // FR, FL, BL, BR
+    int otherEdges[8] = { 0, 1, 2, 3, 4, 5, 6, 7 }; // Restul
     int sliceIdx = 0;
     int otherIdx = 0;
 
-
     for (int i = 11; i >= 0; i--) {
         int comb = combinations(i, k);
-
         if (index - comb >= 0) {
-
             EdgePermutation[i] = otherEdges[otherIdx++];
             index -= comb;
         }
         else {
-
             EdgePermutation[i] = sliceEdges[sliceIdx++];
             k--;
         }
@@ -784,7 +742,7 @@ void Cubie::setUDSlicePhase2Coord(int UDMidPhase2ToUnpack)
 
 void Cubie::setUDSliceRestPhase2Coord(int UDSliceRestToUnpack)
 {
-    int tempEP[8];
+    int tempEP[8] = { 0 }   ;
     tempEP[0] = 0;
 
 
