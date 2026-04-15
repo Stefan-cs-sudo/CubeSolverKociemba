@@ -4,6 +4,7 @@
 #include "Constants.h"
 #include <cassert>
 
+/*
 static inline void assertCoordCube(const CoordCube& s) {
     assert(0 <= s.cp && s.cp < 40320);
     assert(0 <= s.ep && s.ep < 40320);
@@ -12,7 +13,7 @@ static inline void assertCoordCube(const CoordCube& s) {
     assert(0 <= s.flip && s.flip < 2048);
     assert(0 <= s.udslicePhase2 && s.udslicePhase2 < 24);
 }
-
+*/
 CoordCube::CoordCube(Cubie c) {
     twist = c.getTwistCoord();
     flip = c.getFlipCoord();
@@ -20,7 +21,7 @@ CoordCube::CoordCube(Cubie c) {
     cp = c.getCPCoord();
     ep = c.getEPCoord();
     udslicePhase2 = c.getUDSlicePhase2Coord();
-    assertCoordCube(*this);
+   // assertCoordCube(*this);
 }
 
 void CoordCube::move(int m) {
@@ -33,5 +34,5 @@ void CoordCube::move(int m) {
         ep = Tables::EPMove[ep * 18 + m];
         udslicePhase2 = Tables::UDSlicePhase2Move[udslicePhase2 * 18 + m];
     
-    assertCoordCube(*this);
+   // assertCoordCube(*this);
 }

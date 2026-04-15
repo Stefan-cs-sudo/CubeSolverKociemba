@@ -33,12 +33,12 @@ Tables::Tables()
 	if (file != NULL) {
 		bool ok = true;
 		// Citim si verificam exact cati bytes s-au citit ca sa nu incarcam fisiere corupte
-		ok &= (fread(TwistMove.data(), sizeof(int), TwistMove.size(), file) == TwistMove.size());
-		ok &= (fread(FlipMove.data(), sizeof(int), FlipMove.size(), file) == FlipMove.size());
-		ok &= (fread(UDSliceMove.data(), sizeof(int), UDSliceMove.size(), file) == UDSliceMove.size());
-		ok &= (fread(UDSlicePhase2Move.data(), sizeof(int), UDSlicePhase2Move.size(), file) == UDSlicePhase2Move.size());
-		ok &= (fread(CPMove.data(), sizeof(int), CPMove.size(), file) == CPMove.size());
-		ok &= (fread(EPMove.data(), sizeof(int), EPMove.size(), file) == EPMove.size());
+		ok &= (fread(TwistMove.data(), sizeof(uint16_t), TwistMove.size(), file) == TwistMove.size());
+		ok &= (fread(FlipMove.data(), sizeof(uint16_t  ), FlipMove.size(), file) == FlipMove.size());
+		ok &= (fread(UDSliceMove.data(), sizeof(uint16_t), UDSliceMove.size(), file) == UDSliceMove.size());
+		ok &= (fread(UDSlicePhase2Move.data(), sizeof(uint16_t), UDSlicePhase2Move.size(), file) == UDSlicePhase2Move.size());
+		ok &= (fread(CPMove.data(), sizeof(uint16_t), CPMove.size(), file) == CPMove.size());
+		ok &= (fread(EPMove.data(), sizeof(uint16_t), EPMove.size(), file) == EPMove.size());
 
 		ok &= (fread(Slice_Twist_Prun.data(), sizeof(uint8_t), Slice_Twist_Prun.size(), file) == Slice_Twist_Prun.size());
 		ok &= (fread(Slice_Flip_Prun.data(), sizeof(uint8_t), Slice_Flip_Prun.size(), file) == Slice_Flip_Prun.size());
@@ -49,10 +49,10 @@ Tables::Tables()
 		fclose(file);
 
 		if (ok) {
-			std::cout << "Tabelele au fost incarcate cu succes din fisier!\n";
+		//	cout << "Tabelele au fost incarcate cu succes din fisier!\n";
 		}
 		else {
-			std::cout << "Eroare: Fisierul .bin este corupt sau incomplet. Regeneram...\n";
+			cout << "Eroare: Fisierul .bin este corupt sau incomplet. Regeneram...\n";
 			file = NULL; // Fortam generarea
 		}
 	}
@@ -63,13 +63,15 @@ Tables::Tables()
 
 		FILE* outFile = fopen("kociemba_tables.bin", "wb");
 		if (outFile != NULL) {
-			fwrite(TwistMove.data(), sizeof(int), TwistMove.size(), outFile);
-			fwrite(FlipMove.data(), sizeof(int), FlipMove.size(), outFile);
-			fwrite(UDSliceMove.data(), sizeof(int), UDSliceMove.size(), outFile);
-			fwrite(UDSlicePhase2Move.data(), sizeof(int), UDSlicePhase2Move.size(), outFile);
-			fwrite(CPMove.data(), sizeof(int), CPMove.size(), outFile);
-			fwrite(EPMove.data(), sizeof(int), EPMove.size(), outFile);
+			// AICI ERA GRESEALA! Acum folosim sizeof(uint16_t)
+			fwrite(TwistMove.data(), sizeof(uint16_t), TwistMove.size(), outFile);
+			fwrite(FlipMove.data(), sizeof(uint16_t), FlipMove.size(), outFile);
+			fwrite(UDSliceMove.data(), sizeof(uint16_t), UDSliceMove.size(), outFile);
+			fwrite(UDSlicePhase2Move.data(), sizeof(uint16_t), UDSlicePhase2Move.size(), outFile);
+			fwrite(CPMove.data(), sizeof(uint16_t), CPMove.size(), outFile);
+			fwrite(EPMove.data(), sizeof(uint16_t), EPMove.size(), outFile);
 
+			// Astea erau deja corecte (uint8_t)
 			fwrite(Slice_Twist_Prun.data(), sizeof(uint8_t), Slice_Twist_Prun.size(), outFile);
 			fwrite(Slice_Flip_Prun.data(), sizeof(uint8_t), Slice_Flip_Prun.size(), outFile);
 			fwrite(Twist_Flip_Prun.data(), sizeof(uint8_t), Twist_Flip_Prun.size(), outFile);
@@ -77,19 +79,14 @@ Tables::Tables()
 			fwrite(Slice_EP_Prun.data(), sizeof(uint8_t), Slice_EP_Prun.size(), outFile);
 
 			fclose(outFile);
-			std::cout << "Tabelele au fost salvate in kociemba_tables.bin!\n";
+			//cout << "Tabelele au fost salvate in kociemba_tables.bin!\n";
 		}
 		else {
 			std::cout << "EROARE CRITICA: Nu am putut salva fisierul kociemba_tables.bin! Verifica permisiunile.\n";
 		}
 	}
 
-	// Doar pentru debugging (poti sterge astea mai tarziu)
-	std::cout << "Slice_Twist_Prun size=" << Tables::Slice_Twist_Prun.size() << "\n";
-	std::cout << "Slice_Flip_Prun size=" << Tables::Slice_Flip_Prun.size() << "\n";
-	std::cout << "Twist_Flip_Prun size=" << Tables::Twist_Flip_Prun.size() << "\n";
-	std::cout << "Slice_CP_Prun size=" << Tables::Slice_CP_Prun.size() << "\n";
-	std::cout << "Slice_EP_Prun size=" << Tables::Slice_EP_Prun.size() << "\n";
+	
 }
 void Tables::BuildTwistMove() {
 	
@@ -197,7 +194,7 @@ void Tables::BuildSlice_Twist_Prun() {
 	int depth = 0;
 	int done = 1;
 
-	std::cout << "Generam Slice_Twist_Prun...\n";
+	//cout << "Generam Slice_Twist_Prun...\n";
 	while (done < totalStates) {
 		for (int i = 0; i < totalStates; i++) {
 			if (Slice_Twist_Prun[i] == depth) {
@@ -217,7 +214,7 @@ void Tables::BuildSlice_Twist_Prun() {
 			}
 		}
 		depth++;
-		std::cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
+		//cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
 	}
 }
 void Tables::BuildSlice_Flip_Prun() {
@@ -228,7 +225,7 @@ void Tables::BuildSlice_Flip_Prun() {
 	int depth = 0;
 	int done = 1;
 
-	std::cout << "Generam Slice_Flip_Prun...\n";
+	//cout << "Generam Slice_Flip_Prun...\n";
 	while (done < totalStates) {
 		for (int i = 0; i < totalStates; i++) {
 			if (Slice_Flip_Prun[i] == depth) {
@@ -248,7 +245,7 @@ void Tables::BuildSlice_Flip_Prun() {
 			}
 		}
 		depth++;
-		std::cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
+		//cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
 	}
 }
 void Tables::BuildTwist_Flip_Prun()
@@ -260,7 +257,7 @@ void Tables::BuildTwist_Flip_Prun()
 	int depth = 0;
 	int done = 1;
 
-	std::cout << "Generam Twist_Flip_Prun...\n";
+	//cout << "Generam Twist_Flip_Prun...\n";
 
 	while (done < totalStates) {
 		for (int i = 0; i < totalStates; i++) {
@@ -281,7 +278,7 @@ void Tables::BuildTwist_Flip_Prun()
 			}
 		}
 		depth++;
-		std::cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
+		//cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
 	}
 }
 
@@ -311,7 +308,7 @@ void Tables::BuildUDSlicePhase2Move() {
 	int done = 1;
 	int last_done = 0;
 
-	std::cout << "Generam Slice_CP_Prun (Faza 2)...\n";
+	//cout << "Generam Slice_CP_Prun (Faza 2)...\n";
 
 	int phase2Moves[10] = { Moves::U1, Moves::U2, Moves::U3,
 							Moves::D1, Moves::D2, Moves::D3,
@@ -341,7 +338,7 @@ void Tables::BuildUDSlicePhase2Move() {
 		}
 
 		depth++;
-		std::cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
+		//cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
 	}
 }void Tables::BuildSlice_EP_Prun()
 {
@@ -354,7 +351,7 @@ void Tables::BuildUDSlicePhase2Move() {
 	int done = 1;
 	int last_done = 0;
 
-	std::cout << "Generam Slice_EP_Prun (Faza 2)...\n";
+	//cout << "Generam Slice_EP_Prun (Faza 2)...\n";
 
 	int phase2Moves[10] = { Moves::U1, Moves::U2, Moves::U3,
 							Moves::D1, Moves::D2, Moves::D3,
@@ -384,13 +381,13 @@ void Tables::BuildUDSlicePhase2Move() {
 		}
 
 		depth++;
-		std::cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
+		//cout << "Adancime " << depth << " terminata. Am gasit " << done << " stari.\n";
 	}
 }
 
 void Tables::BuildingTables()
 {
-	cout << "Asteapta, se genereaza tabelele... (Va dura cateva minute)\n";
+	//cout << "Asteapta, se genereaza tabelele... (Va dura cateva minute)\n";
 
 	Cubie setup;
 	setup.initMoves(); 

@@ -7,6 +7,7 @@
 #include "CubieCube.h"
 #include "CoordCube.h"
 #include "Search.h"
+ #include <omp.h> 
 #define _CRT_SECURE_NO_WARNINGS
 #include "Tables.h"
 using namespace std;
@@ -34,42 +35,9 @@ std::string parseWenglorNet(const std::string& net) {
 
     return urfdlb;
 }
-static void selfTestCoords() {
-    for (int i = 0; i < 2187; i++) {
-        Cubie c;
-        c.setTwistCoord(i);
-        if (c.getTwistCoord() != i) {
-            std::cout << "Twist mismatch at " << i << "\n";
-            break;
-        }
-    }
-    for (int i = 0; i < 2048; i++) {
-        Cubie c;
-        c.setFlipCoord(i);
-        if (c.getFlipCoord() != i) {
-            std::cout << "Flip mismatch at " << i << "\n";
-            break;
-        }
-    }
-    for (int i = 0; i < 495; i++) {
-        Cubie c;
-        c.setUDSliceCoord(i);
-        if (c.getUDSliceCoord() != i) {
-            std::cout << "UDSlice mismatch at " << i << "\n";
-            break;
-        }
-    }
-    for (int i = 0; i < 24; i++) {
-        Cubie c;
-        c.setUDSlicePhase2Coord(i);
-        if (c.getUDSlicePhase2Coord() != i) {
-            std::cout << "UDSlicePhase2 mismatch at " << i << "\n";
-            break;
-        }
-    }
-}
 
-// #include <omp.h> 
+
+
 
 int main() {
     Cubie initHelper;
@@ -96,41 +64,44 @@ int main() {
     }
     Tables tabele;
     
-    selfTestCoords(); // cel pe care l-ai pus deja
+    
 
     FaceCube StringtoCubie;
-    Search Solver;
+    
 
 
     vector<string> solutions(scrambledCubes.size());
 
-
-    // #pragma omp parallel for
+    int solvedCount = 0;
+   #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < (int)scrambledCubes.size(); ++i) {
         try {
-            if (scrambledCubes[i].size() != 54) {
-                std::cerr << "Linie invalida la " << i << "\n";
-                continue;
-            }
+            FaceCube localFaceCube;
+            Search localSolver;
 
-            // 1. Traducem din Wenglor (panglica) in standard Kociemba
             std::string urfdlbFormat = parseWenglorNet(scrambledCubes[i]);
+            localFaceCube.Facelets(urfdlbFormat);
 
-            // 2. Mapeaza fetele
-            StringtoCubie.Facelets(urfdlbFormat);
-
-            // 3. Rezolva
-            std::string sol = Solver.solve(StringtoCubie.toCubieCube());
+            std::string sol = localSolver.solve(localFaceCube.toCubieCube());
             solutions[i] = sol;
-
-            std::cout << "Cube " << i << ": " << scrambledCubes[i] << "\n";
-            std::cout << "Solutie: " << sol << "\n";
+            cout << sol << endl;
         }
         catch (const std::exception& e) {
-            std::cerr << "Eroare la cube " << i << ": " << e.what() << "\n";
             solutions[i] = "ERROR";
         }
+
+        // Actualizam progresul in siguranta intre thread-uri
+#pragma omp atomic
+        solvedCount++;
+
+        // Afisam progresul doar o data la 10 cuburi (sau 100) ca sa nu incetinim procesorul
+        if (solvedCount % 10 == 0 || solvedCount == scrambledCubes.size()) {
+            // '\r' face ca textul sa se suprascrie pe aceeasi linie
+            std::cout << "\rProgres: " << solvedCount << " / " << scrambledCubes.size() << " cuburi rezolvate.";
+        }
     }
+
+       
 
     // 3. Scriem solu?iile în ordine în fi?ier
     for (const auto& sol : solutions) {

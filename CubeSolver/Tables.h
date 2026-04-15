@@ -16,18 +16,18 @@ class CoordCube;
 
 class Tables {
 public:
-	inline static vector<int> TwistMove;
+	inline static vector<uint16_t > TwistMove;
 
-	inline static vector<int> FlipMove;
+	inline static vector<uint16_t > FlipMove;
 
-	inline static vector<int> UDSliceMove;
+	inline static vector<uint16_t > UDSliceMove;
 
-	inline static vector<int> CPMove;
+	inline static vector<uint16_t > CPMove;
 
-	inline static	vector<int>EPMove;
+	inline static	vector<uint16_t >EPMove;
 
 
-	inline static vector<int >UDSlicePhase2Move;
+	inline static vector<uint16_t  >UDSlicePhase2Move;
 
 	inline static std::vector<uint8_t> Slice_Twist_Prun; // size 495*2187
 	inline static std::vector<uint8_t> Slice_Flip_Prun;  // size 495*2048

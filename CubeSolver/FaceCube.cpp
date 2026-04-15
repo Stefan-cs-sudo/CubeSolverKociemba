@@ -105,7 +105,7 @@ Cubie FaceCube::toCubieCube() {
         char a = facelets[edgeIndices[i][0]];
         char b = facelets[edgeIndices[i][1]];
 
-        // determin? ce pies? este (care dintre cele 12)
+       
         int piece = -1;
         int ori = 0;
 
