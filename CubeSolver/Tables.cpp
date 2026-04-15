@@ -11,15 +11,16 @@ using namespace std;
 
 
 
+
 Tables::Tables()
 {
-	
+	// 1. Alocam intotdeauna memorie inainte sa citim/generam
 	TwistMove.resize(2187 * 18);
 	FlipMove.resize(2048 * 18);
 	UDSliceMove.resize(495 * 18);
-	UDSlicePhase2Move.resize(24 * 18); 
-	CPMove.resize(40320 * 18);         
-	EPMove.resize(40320 * 18);       
+	UDSlicePhase2Move.resize(24 * 18);
+	CPMove.resize(40320 * 18);
+	EPMove.resize(40320 * 18);
 
 	Twist_Flip_Prun.resize(2187 * 2048);
 	Slice_Twist_Prun.resize(495 * 2187);
@@ -27,51 +28,69 @@ Tables::Tables()
 	Slice_CP_Prun.resize(40320 * 24);
 	Slice_EP_Prun.resize(40320 * 24);
 
+	// 2. Incarcam fisierul
 	FILE* file = fopen("kociemba_tables.bin", "rb");
 	if (file != NULL) {
-		fread(TwistMove.data(), sizeof(int), TwistMove.size(), file);
-		fread(FlipMove.data(), sizeof(int), FlipMove.size(), file);
-		fread(UDSliceMove.data(), sizeof(int), UDSliceMove.size(), file);
-		fread(UDSlicePhase2Move.data(), sizeof(int), UDSlicePhase2Move.size(), file);
-		fread(CPMove.data(), sizeof(int), CPMove.size(), file);
-		fread(EPMove.data(), sizeof(int), EPMove.size(), file);
-		fread(Slice_Twist_Prun.data(), sizeof(uint8_t), Slice_Twist_Prun.size(), file);
-		fread(Slice_Flip_Prun.data(), sizeof(uint8_t), Slice_Flip_Prun.size(), file);
-		fread(Twist_Flip_Prun.data(), sizeof(uint8_t), Twist_Flip_Prun.size(), file);
-		fread(Slice_CP_Prun.data(), sizeof(uint8_t), Slice_CP_Prun.size(), file);
-		fread(Slice_EP_Prun.data(), sizeof(uint8_t), Slice_EP_Prun.size(), file);
+		bool ok = true;
+		// Citim si verificam exact cati bytes s-au citit ca sa nu incarcam fisiere corupte
+		ok &= (fread(TwistMove.data(), sizeof(int), TwistMove.size(), file) == TwistMove.size());
+		ok &= (fread(FlipMove.data(), sizeof(int), FlipMove.size(), file) == FlipMove.size());
+		ok &= (fread(UDSliceMove.data(), sizeof(int), UDSliceMove.size(), file) == UDSliceMove.size());
+		ok &= (fread(UDSlicePhase2Move.data(), sizeof(int), UDSlicePhase2Move.size(), file) == UDSlicePhase2Move.size());
+		ok &= (fread(CPMove.data(), sizeof(int), CPMove.size(), file) == CPMove.size());
+		ok &= (fread(EPMove.data(), sizeof(int), EPMove.size(), file) == EPMove.size());
+
+		ok &= (fread(Slice_Twist_Prun.data(), sizeof(uint8_t), Slice_Twist_Prun.size(), file) == Slice_Twist_Prun.size());
+		ok &= (fread(Slice_Flip_Prun.data(), sizeof(uint8_t), Slice_Flip_Prun.size(), file) == Slice_Flip_Prun.size());
+		ok &= (fread(Twist_Flip_Prun.data(), sizeof(uint8_t), Twist_Flip_Prun.size(), file) == Twist_Flip_Prun.size());
+		ok &= (fread(Slice_CP_Prun.data(), sizeof(uint8_t), Slice_CP_Prun.size(), file) == Slice_CP_Prun.size());
+		ok &= (fread(Slice_EP_Prun.data(), sizeof(uint8_t), Slice_EP_Prun.size(), file) == Slice_EP_Prun.size());
 
 		fclose(file);
-		cout << "Tabelele au fost incarcate cu succes din fisier!\n";
-	}
-	else {
-		
-			BuildingTables(); 
 
-			FILE* file = fopen("kociemba_tables.bin", "wb");
-			if (file != NULL) {
-				fwrite(TwistMove.data(), sizeof(int), TwistMove.size(), file);
-				fwrite(FlipMove.data(), sizeof(int), FlipMove.size(), file);
-				fwrite(UDSliceMove.data(), sizeof(int), UDSliceMove.size(), file);
-				fwrite(UDSlicePhase2Move.data(), sizeof(int), UDSlicePhase2Move.size(), file);
-				fwrite(CPMove.data(), sizeof(int), CPMove.size(), file);
-				fwrite(EPMove.data(), sizeof(int), EPMove.size(), file);
-				fwrite(Slice_Twist_Prun.data(), sizeof(uint8_t), Slice_Twist_Prun.size(), file);
-				fwrite(Slice_Flip_Prun.data(), sizeof(uint8_t), Slice_Flip_Prun.size(), file);
-				fwrite(Twist_Flip_Prun.data(), sizeof(uint8_t), Twist_Flip_Prun.size(), file);
-				fwrite(Slice_CP_Prun.data(), sizeof(uint8_t), Slice_CP_Prun.size(), file);
-				fwrite(Slice_EP_Prun.data(), sizeof(uint8_t), Slice_EP_Prun.size(), file);
-				fclose(file);
-			}
-	
+		if (ok) {
+			std::cout << "Tabelele au fost incarcate cu succes din fisier!\n";
+		}
+		else {
+			std::cout << "Eroare: Fisierul .bin este corupt sau incomplet. Regeneram...\n";
+			file = NULL; // Fortam generarea
+		}
 	}
+
+	// 3. Daca nu exista fisierul sau e corupt -> Generam
+	if (file == NULL) {
+		BuildingTables();
+
+		FILE* outFile = fopen("kociemba_tables.bin", "wb");
+		if (outFile != NULL) {
+			fwrite(TwistMove.data(), sizeof(int), TwistMove.size(), outFile);
+			fwrite(FlipMove.data(), sizeof(int), FlipMove.size(), outFile);
+			fwrite(UDSliceMove.data(), sizeof(int), UDSliceMove.size(), outFile);
+			fwrite(UDSlicePhase2Move.data(), sizeof(int), UDSlicePhase2Move.size(), outFile);
+			fwrite(CPMove.data(), sizeof(int), CPMove.size(), outFile);
+			fwrite(EPMove.data(), sizeof(int), EPMove.size(), outFile);
+
+			fwrite(Slice_Twist_Prun.data(), sizeof(uint8_t), Slice_Twist_Prun.size(), outFile);
+			fwrite(Slice_Flip_Prun.data(), sizeof(uint8_t), Slice_Flip_Prun.size(), outFile);
+			fwrite(Twist_Flip_Prun.data(), sizeof(uint8_t), Twist_Flip_Prun.size(), outFile);
+			fwrite(Slice_CP_Prun.data(), sizeof(uint8_t), Slice_CP_Prun.size(), outFile);
+			fwrite(Slice_EP_Prun.data(), sizeof(uint8_t), Slice_EP_Prun.size(), outFile);
+
+			fclose(outFile);
+			std::cout << "Tabelele au fost salvate in kociemba_tables.bin!\n";
+		}
+		else {
+			std::cout << "EROARE CRITICA: Nu am putut salva fisierul kociemba_tables.bin! Verifica permisiunile.\n";
+		}
+	}
+
+	// Doar pentru debugging (poti sterge astea mai tarziu)
 	std::cout << "Slice_Twist_Prun size=" << Tables::Slice_Twist_Prun.size() << "\n";
 	std::cout << "Slice_Flip_Prun size=" << Tables::Slice_Flip_Prun.size() << "\n";
 	std::cout << "Twist_Flip_Prun size=" << Tables::Twist_Flip_Prun.size() << "\n";
 	std::cout << "Slice_CP_Prun size=" << Tables::Slice_CP_Prun.size() << "\n";
 	std::cout << "Slice_EP_Prun size=" << Tables::Slice_EP_Prun.size() << "\n";
 }
-
 void Tables::BuildTwistMove() {
 	
 	for (int i = 0; i < 2187; i++)

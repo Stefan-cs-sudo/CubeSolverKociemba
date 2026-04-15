@@ -48,7 +48,7 @@ public:
 	void BuildEPMove();
 	void BuildSlice_Twist_Prun();
 	void BuildSlice_Flip_Prun();
-	void BuildTwist_Flip_Prun(); // NEW
+	void BuildTwist_Flip_Prun(); 
 	
 
 	void BuildUDSlicePhase2Move();

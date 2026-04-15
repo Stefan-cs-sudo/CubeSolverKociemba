@@ -195,7 +195,7 @@ bool Search::searchPhase1(int depth, int depthToGoal, int lastMove, int prevMove
 bool Search::searchPhase2(int depth, int depthToGoal, int lastMove) {
     int phase2Moves[10] = { U1, U2, U3, D1, D2, D3, R2, L2, F2, B2 };
     nodes2++;
-    if ((nodes2 & ((1ull << 22) - 1)) == 0) std::cout << "nodes1=" << nodes2 << "\n"; // la ~4M
+   
     int cp = cpS[depth];
     int ep = epS[depth];
     int s2 = slice2S[depth];

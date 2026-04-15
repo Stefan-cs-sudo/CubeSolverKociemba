@@ -72,6 +72,9 @@ static void selfTestCoords() {
 // #include <omp.h> 
 
 int main() {
+    Cubie initHelper;
+    initHelper.initMoves();
+
    ifstream inputFile("input.txt");
    ofstream outputFile("solutions.txt");
     
