@@ -5,44 +5,10 @@
 #include "CoordCube.h"
 #include <vector>
 #include <filesystem>
+#include "Constants.h"
 class Cubie;
 
 
-
-enum Moves {
-    U1, U2, U3,
-    R1, R2, R3,
-    L1, L2, L3,
-    B1, B2, B3,
-    D1, D2, D3,
-    F1, F2, F3
-};
-
-enum Orientation {
-    correct,
-    clockwise,
-    antiClockwise
-
-};
-
-
-enum Corners {
-
-    URF, ULF, ULB, URB,
-    DRF, DLF, DLB, DRB
-
-
-};
-
-
-enum Edges {
-
-
-    UR,UF,UL,UB,
-    DR,DF,DL,DB,
-    FR,FL,BL, BR
-
-};
 
 
 
@@ -50,755 +16,96 @@ enum Edges {
 class Cubie
 {
 
-
-    short CornerPermutation[8] = {};
+    public:
+        short CornerPermutation[8] = {};
     uint8_t CornerOrientation[8] = {};
     short EdgePermutation[12] = {};
     uint8_t EdgeOrientation[12] = {};
 
-public:
-    static Cubie Mutari[18];
-    Cubie()
-    {
-        for (size_t i = 0; i < 8; i++)
-        {
-            CornerPermutation[i] = i;
-            CornerOrientation[i] = 0;
-        }
-        for (size_t i = 0; i < 12; i++)
-        {
-            EdgePermutation[i] = i;
-            EdgeOrientation[i] = 0;
-        }
 
+     static Cubie Mutari[18];
+     Cubie();
 
 
 
-
-
-    }
-
-
-
-    void initMoves()
-    {
-        Cubie U1;
-
-        U1.CornerPermutation[URF] = URB;
-        U1.CornerPermutation[ULF] = URF;
-        U1.CornerPermutation[ULB] = ULF;
-        U1.CornerPermutation[URB] = ULB;
-
-        U1.CornerOrientation[URF] = 0;
-        U1.CornerOrientation[ULF] = 0;
-        U1.CornerOrientation[ULB] = 0;
-        U1.CornerOrientation[URB] = 0;
-
-        U1.EdgePermutation[UF] = UR;
-        U1.EdgePermutation[UL] = UF;
-        U1.EdgePermutation[UB] = UL;
-        U1.EdgePermutation[UR] = UB;
-
-        U1.EdgeOrientation[UF] = 0;
-        U1.EdgeOrientation[UR] = 0;
-        U1.EdgeOrientation[UL] = 0;
-        U1.EdgeOrientation[UB] = 0;
-        Mutari[Moves::U1] = U1;
-
-
-
-        Cubie U2;
-
-        U2.CornerPermutation[URF] = ULB;
-        U2.CornerPermutation[ULF] = URB;
-        U2.CornerPermutation[ULB] = URF;
-        U2.CornerPermutation[URB] = ULF;
-
-        U2.CornerOrientation[URF] = 0;
-        U2.CornerOrientation[ULF] = 0;
-        U2.CornerOrientation[ULB] = 0;
-        U2.CornerOrientation[URB] = 0;
-
-        U2.EdgePermutation[UF] = UB;
-        U2.EdgePermutation[UL] = UR;
-        U2.EdgePermutation[UB] = UF;
-        U2.EdgePermutation[UR] = UL;
-
-        U2.EdgeOrientation[UF] = 0;
-        U2.EdgeOrientation[UR] = 0;
-        U2.EdgeOrientation[UL] = 0;
-        U2.EdgeOrientation[UB] = 0;
-
-       Mutari[Moves::U2] = U2;
-
-        Cubie U3;
-
-        U3.CornerPermutation[URF] = ULF;
-        U3.CornerPermutation[ULF] = ULB;
-        U3.CornerPermutation[ULB] = URB;
-        U3.CornerPermutation[URB] = URF;
-
-        U3.CornerOrientation[URF] = 0;
-        U3.CornerOrientation[ULF] = 0;
-        U3.CornerOrientation[ULB] = 0;
-        U3.CornerOrientation[URB] = 0;
-
-        U3.EdgePermutation[UF] = UL;
-        U3.EdgePermutation[UL] = UB;
-        U3.EdgePermutation[UB] = UR;
-        U3.EdgePermutation[UR] = UF;
-
-        U3.EdgeOrientation[UF] = 0;
-        U3.EdgeOrientation[UR] = 0;
-        U3.EdgeOrientation[UL] = 0;
-        U3.EdgeOrientation[UB] = 0;
-
-        Mutari[Moves::U3] = U3;
-
-
-        Cubie R1;
-
-        R1.CornerPermutation[URF] = DRF;
-        R1.CornerPermutation[DRF] = DRB;
-        R1.CornerPermutation[DRB] = URB;
-        R1.CornerPermutation[URB] = URF;
-
-        R1.CornerOrientation[URF]=2;
-        R1.CornerOrientation[URB] = 1;
-        R1.CornerOrientation[DRF] = 1;
-        R1.CornerOrientation[DRB] = 2;
-
-        R1.EdgePermutation[FR] = DR;
-        R1.EdgePermutation[DR] = BR;
-        R1.EdgePermutation[BR] = UR;
-        R1.EdgePermutation[UR] = FR;
-
-        R1.EdgeOrientation[FR] = 0;
-        R1.EdgeOrientation[DR] = 0;
-        R1.EdgeOrientation[BR] = 0;
-        R1.EdgeOrientation[UR] = 0;
-       
-
-
-        Mutari[Moves::R1] = R1;
-
-        Cubie R2;
-
-        R2.CornerPermutation[URF] = DRB;
-        R2.CornerPermutation[DRF] = URB;
-        R2.CornerPermutation[DRB] = URF;
-        R2.CornerPermutation[URB] = DRF;
-
-
-       R2.CornerOrientation[URF] = 0;
-       R2.CornerOrientation[URB] = 0;
-       R2.CornerOrientation[DRF] = 0;
-       R2.CornerOrientation[DRB] = 0;
-       
-
-        R2.EdgePermutation[FR] = BR;
-        R2.EdgePermutation[DR] = UR;
-        R2.EdgePermutation[BR] = FR;
-        R2.EdgePermutation[UR] = DR;
-
-
-        R2.EdgeOrientation[FR] = 0;
-        R2.EdgeOrientation[DR] = 0;
-        R2.EdgeOrientation[BR] = 0;
-        R2.EdgeOrientation[UR] = 0;
-
-
-        Mutari[Moves::R2] = R2;
-
-
-        Cubie R3;
-
-        R3.CornerPermutation[URF] = URB;
-        R3.CornerPermutation[DRF] = URF;
-        R3.CornerPermutation[DRB] = DRF;
-        R3.CornerPermutation[URB] = DRB;
-
-       R3.CornerOrientation[URF] = 2;
-       R3.CornerOrientation[URB] = 1;
-       R3.CornerOrientation[DRF] = 1;
-       R3.CornerOrientation[DRB] = 2;
-
-        R3.EdgePermutation[FR] = UR;
-        R3.EdgePermutation[DR] = FR;
-        R3.EdgePermutation[BR] = DR;
-        R3.EdgePermutation[UR] = BR;
-
-        R3.EdgeOrientation[FR] = 0;
-        R3.EdgeOrientation[DR] = 0;
-        R3.EdgeOrientation[BR] = 0;
-        R3.EdgeOrientation[UR] = 0;
-
-        Mutari[Moves::R3] = R3;
-
-
-
-        Cubie L1;
-
-        L1.CornerPermutation[ULF] = ULB;
-        L1.CornerPermutation[ULB] = DLB;
-        L1.CornerPermutation[DLB] = DLF;
-        L1.CornerPermutation[DLF] = ULF;
-
-        L1.CornerOrientation[ULF] =1 ;
-        L1.CornerOrientation[ULB] = 2;
-        L1.CornerOrientation[DLB] = 1;
-        L1.CornerOrientation[DLF] = 2;
-
-
-        L1.EdgePermutation[FL] = UL;
-        L1.EdgePermutation[UL] = BL;
-        L1.EdgePermutation[BL] = DL;
-        L1.EdgePermutation[DL] = FL;
-
-        L1.EdgeOrientation[FL] = 0;
-        L1.EdgeOrientation[UL] = 0;
-        L1.EdgeOrientation[BL] = 0;
-        L1.EdgeOrientation[DL] = 0;
-
-        Mutari[Moves::L1] = L1;
-
-
-        Cubie L2;
-
-        L2.CornerPermutation[ULF] = DLB;
-        L2.CornerPermutation[ULB] = DLF;
-        L2.CornerPermutation[DLB] = ULF;
-        L2.CornerPermutation[DLF] = ULB;
-
-
-        L2.CornerOrientation[ULF] = 0;
-        L2.CornerOrientation[ULB] = 0;
-        L2.CornerOrientation[DLB] = 0;
-        L2.CornerOrientation[DLF] = 0;
-
-        L2.EdgePermutation[FL] = BL;
-        L2.EdgePermutation[UL] = DL;
-        L2.EdgePermutation[BL] = FL;
-        L2.EdgePermutation[DL] = UL;
-
-        L2.EdgeOrientation[FL] = 0;
-        L2.EdgeOrientation[UL] = 0;
-        L2.EdgeOrientation[BL] = 0;
-        L2.EdgeOrientation[DL] = 0;
-
-
-
-        Mutari[Moves::L2] = L2;
-
-
-
-        Cubie L3;
-
-        L3.CornerPermutation[ULF] = DLF;
-        L3.CornerPermutation[DLF] = DLB;
-        L3.CornerPermutation[DLB] = ULB;
-        L3.CornerPermutation[ULB] = ULF;
-
-        L3.CornerOrientation[ULF] = 1;
-        L3.CornerOrientation[ULB] = 2;
-        L3.CornerOrientation[DLB] = 1;
-        L3.CornerOrientation[DLF] = 2;
-
-        L3.EdgePermutation[FL] = DL;
-        L3.EdgePermutation[UL] = FL;
-        L3.EdgePermutation[BL] = UL;
-        L3.EdgePermutation[DL] = BL;
-
-        L3.EdgeOrientation[FL] = 0;
-        L3.EdgeOrientation[UL] = 0;
-        L3.EdgeOrientation[BL] = 0;
-        L3.EdgeOrientation[DL] = 0;
-
-        Mutari[Moves::L3] = L3;
-
-
-
-
-        Cubie B1;
-
-        B1.CornerPermutation[URB] = DRB;
-        B1.CornerPermutation[DRB] = DLB;
-        B1.CornerPermutation[DLB] = ULB;
-        B1.CornerPermutation[ULB] = URB;
-
-        B1.CornerOrientation[URB] =2 ;
-        B1.CornerOrientation[DRB] = 1;
-        B1.CornerOrientation[DLB] = 2;
-        B1.CornerOrientation[ULB] = 1;
-
-        B1.EdgePermutation[BL] = UB;
-        B1.EdgePermutation[UB] = BR;
-        B1.EdgePermutation[BR] = DB;
-        B1.EdgePermutation[DB] = BL;
-
-        B1.EdgeOrientation[BL] = 1;
-        B1.EdgeOrientation[DB] = 1;
-        B1.EdgeOrientation[BR] = 1;
-        B1.EdgeOrientation[UB] = 1;
-
-        Mutari[Moves::B1] = B1;
-
-
-
-        Cubie B2;
-
-        B2.CornerPermutation[URB] = DLB;
-        B2.CornerPermutation[DLB] = URB;
-        B2.CornerPermutation[ULB] = DRB;
-        B2.CornerPermutation[DRB] = ULB;
-
-        B2.CornerOrientation[URB] = 0;
-        B2.CornerOrientation[DRB] = 0;
-        B2.CornerOrientation[DLB] = 0;
-        B2.CornerOrientation[ULB] = 0;
-
-        B2.EdgePermutation[BL] = BR;
-        B2.EdgePermutation[BR] = BL;
-        B2.EdgePermutation[UB] = DB;
-        B2.EdgePermutation[DB] = UB;
-
-
-        B2.EdgeOrientation[BL] = 0;
-        B2.EdgeOrientation[DB] = 0;
-        B2.EdgeOrientation[BR] = 0;
-        B2.EdgeOrientation[UB] = 0;
-
-
-
-        Mutari[Moves::B2] = B2;
-
-
-
-        Cubie B3;
-
-        B3.CornerPermutation[URB] = ULB;
-        B3.CornerPermutation[ULB] = DLB;
-        B3.CornerPermutation[DLB] = DRB;
-        B3.CornerPermutation[DRB] = URB;
-
-
-        B3.CornerOrientation[URB] = 2;
-        B3.CornerOrientation[DRB] = 1;
-        B3.CornerOrientation[DLB] = 2;
-        B3.CornerOrientation[ULB] = 1;
-
-        B3.EdgePermutation[BL] = DB;
-        B3.EdgePermutation[DB] = BR;
-        B3.EdgePermutation[BR] = UB;
-        B3.EdgePermutation[UB] = BL;
-
-       B3.EdgeOrientation[BL] = 1;
-       B3.EdgeOrientation[DB] = 1;
-       B3.EdgeOrientation[BR] = 1;
-       B3.EdgeOrientation[UB] = 1;
-
-        Mutari[Moves::B3] = B3;
-
-
-
-
-        Cubie D1;
-
-        D1.CornerPermutation[DRF] = DLF;
-        D1.CornerPermutation[DLF] = DLB;
-        D1.CornerPermutation[DLB] = DRB;
-        D1.CornerPermutation[DRB] = DRF;
-
-
-        D1.CornerOrientation[DRF] = 0;
-        D1.CornerOrientation[DRB] = 0;
-        D1.CornerOrientation[DLB] = 0;
-        D1.CornerOrientation[DLF] = 0;
-
-        D1.EdgePermutation[DF] = DL;
-        D1.EdgePermutation[DL] = DB;
-        D1.EdgePermutation[DB] = DR;
-        D1.EdgePermutation[DR] = DF;
-
-        D1.EdgeOrientation[DF] = 0;
-        D1.EdgeOrientation[DR] = 0;
-        D1.EdgeOrientation[DB] = 0;
-        D1.EdgeOrientation[DL] = 0;
-
-
-        Mutari[Moves::D1] = D1;
-
-
-        Cubie D2;
-
-        D2.CornerPermutation[DRF] = DLB;
-        D2.CornerPermutation[DLB] = DLF;
-        D2.CornerPermutation[DRB] = DLF;
-        D2.CornerPermutation[DLF] = DRB;
-
-        D2.CornerOrientation[DRF] = 0;
-        D2.CornerOrientation[DRB] = 0;
-        D2.CornerOrientation[DLB] = 0;
-        D2.CornerOrientation[DLF] = 0;
-
-        D2.EdgePermutation[DF] = DB;
-        D2.EdgePermutation[DB] = DF;
-        D2.EdgePermutation[DR] = DL;
-        D2.EdgePermutation[DL] = DR;
-
-        D2.EdgeOrientation[DF] = 0;
-        D2.EdgeOrientation[DR] = 0;
-        D2.EdgeOrientation[DB] = 0;
-        D2.EdgeOrientation[DL] = 0;
-
-
-        Mutari[Moves::D2] = D2;
-
-
-        Cubie D3;
-
-        D3.CornerPermutation[DRF] = DRB;
-        D3.CornerPermutation[DRB] = DLB;
-        D3.CornerPermutation[DLB] = DLF;
-        D3.CornerPermutation[DLF] = DRF;
-
-        D3.CornerOrientation[DRF] = 0;
-        D3.CornerOrientation[DRB] = 0;
-        D3.CornerOrientation[DLB] = 0;
-        D3.CornerOrientation[DLF] = 0;
-
-        D3.EdgePermutation[DF] = DR;
-        D3.EdgePermutation[DR] = DB;
-        D3.EdgePermutation[DB] = DL;
-        D3.EdgePermutation[DL] = DF;
-
-        D3.EdgeOrientation[DF] = 0;
-        D3.EdgeOrientation[DR] = 0;
-        D3.EdgeOrientation[DB] = 0;
-        D3.EdgeOrientation[DL] = 0;
-
-        Mutari[Moves::D3] = D3;
-
-
-        Cubie F1;
-
-        F1.CornerPermutation[URF] = ULF;
-        F1.CornerPermutation[ULF] = DLF;
-        F1.CornerPermutation[DLF] = DRF;
-        F1.CornerPermutation[DRF] = URF;
-
-        F1.CornerOrientation[URF] = 1;
-        F1.CornerOrientation[ULF] = 2;
-        F1.CornerOrientation[DLF] = 1;
-        F1.CornerOrientation[DRF] = 2;
-
-
-        F1.EdgePermutation[FR] = UF;
-        F1.EdgePermutation[UF] = FL;
-        F1.EdgePermutation[FL] = DF;
-        F1.EdgePermutation[DF] = FR;
-
-        F1.EdgeOrientation[FR] = 1;
-        F1.EdgeOrientation[UF] = 1;
-        F1.EdgeOrientation[FL] = 1;
-        F1.EdgeOrientation[DF] = 1;
-
-        Mutari[Moves::F1] = F1;
-
-        Cubie F2;
-
-        F2.CornerPermutation[URF] = DLF;
-        F2.CornerPermutation[DLF] = URF;
-        F2.CornerPermutation[ULF] = DRF;
-        F2.CornerPermutation[DRF] = ULF;
-
-        F2.CornerOrientation[URF] = 0;
-        F2.CornerOrientation[ULF] = 0;
-        F2.CornerOrientation[DLF] = 0;
-        F2.CornerOrientation[DRF] = 0;
-
-        F2.EdgePermutation[FR] = FL;
-        F2.EdgePermutation[FL] = FR;
-        F2.EdgePermutation[UF] = DF;
-        F2.EdgePermutation[DF] = UF;
-
-        F2.EdgeOrientation[FR] = 0;
-        F2.EdgeOrientation[UF] = 0;
-        F2.EdgeOrientation[FL] = 0;
-        F2.EdgeOrientation[DF] = 0;
-
-        Mutari[Moves::F2] = F2;
-
-        Cubie F3;
-
-        F3.CornerPermutation[URF] = DRF;
-        F3.CornerPermutation[DRF] = DLF;
-        F3.CornerPermutation[DLF] = ULF;
-        F3.CornerPermutation[ULF] = URF;
-
-        F3.CornerOrientation[URF] = 1;
-        F3.CornerOrientation[ULF] = 2;
-        F3.CornerOrientation[DLF] = 1;
-        F3.CornerOrientation[DRF] = 2;
-
-
-        F3.EdgePermutation[UF] = FR;
-        F3.EdgePermutation[FR] = DF;
-        F3.EdgePermutation[DF] = FL;
-        F3.EdgePermutation[FL] = UF;
-
-        F3.EdgeOrientation[FR] = 1;
-        F3.EdgeOrientation[UF] = 1;
-        F3.EdgeOrientation[FL] = 1;
-        F3.EdgeOrientation[DF] = 1;
-
-        Mutari[Moves::F3] = F3;
-
-    }
-    void  applyMove(Cubie mutare)
-    {
-        this->multiply(mutare);
-    }
-    void  multiply(Cubie mul)
-    {
-        Cubie result;
-        for (size_t i = 0; i < 8; i++)
-        {
-            result.CornerOrientation[i] = (CornerOrientation[mul.CornerPermutation[i]] + mul.CornerOrientation[i]) % 3;
-            result.CornerPermutation[i] = CornerPermutation[mul.CornerPermutation[i]];
-
-        }
-
-        for (size_t i = 0; i < 12; i++)
-        {
-           result.EdgeOrientation[i] = (EdgeOrientation[mul.EdgePermutation[i]] + mul.EdgeOrientation[i]) % 2;
-           result.EdgePermutation[i] = EdgePermutation[mul.EdgePermutation[i]];
-        }
-
-        for (size_t i = 0; i < 8; i++)
-        {
-            this->CornerOrientation[i] = result.CornerOrientation[i];
-            this->CornerPermutation[i] = result.CornerPermutation[i];
-            
-        }
-        for (size_t i = 0; i < 12; i++)
-        {
-            this->EdgeOrientation[i] = result.EdgeOrientation[i];
-            this->EdgePermutation[i] = result.EdgePermutation[i];
-
-        }
-    }
-
-
-
-    CoordCube toCoordCube();
-
-    int getTwistCoord() {
-        int twist = 0;
-        for (int i = URF; i < DRB; i++) {
-            twist = 3 * twist + CornerOrientation[i];
-        }
-        return twist;
-    }
-
-    int getFlipCoord() {
-        int flip = 0;
-        
-        for (int i = 0; i < 11; i++) {
-            flip = 2 * flip + EdgeOrientation[i];
-        }
-        return flip;
-    }
-
-
+    void initMoves();
    
-    int combinations(int n, int k) {
-        if (k < 0 || k > n) return 0; 
-        if (k == 0 || k == n) return 1;
-
-        int c = 1;
-        for (int i = 0; i < k; i++) {
-            c = c * (n - i) / (i + 1);
-        }
-        return c;
-    }
-
-    int getUDSliceCoord() {
-        int UDSliceCoord = 0;
-        int k = 3; 
-
-        
-        for (int i = 11; i >= 0; i--) {
-
-            
-            if (EdgePermutation[i] >= FR && EdgePermutation[i] <= BR) {
-                k--; 
-            }
-            else {
-               
-                UDSliceCoord += combinations(i, k);
-            }
-        }
-
-        return UDSliceCoord;
-    }
-
-    int factorial(int n)
-    {
-        if (n < 0)
-            return 0;
-        else if (n == 0)
-            return 1;
-        else
-        {
-            int rez=0;
-            for (int i = 1; i <= n; i++)
-            {
-                rez *= i;
-            }
-            return rez;
-        }
-    }
-
-    int getCPCoord()
-    {
-        int CPCoord = 0;
-        for (int i = Corners::DRB; i >= Corners::URF; i--)
-        {
-            int distance = 0;
-
-            for (int j = i-1; j >= Corners::URF; j--)
-            {
-                if (CornerPermutation[j] > CornerPermutation[i])
-                    distance++;
-            }
-            CPCoord += (CPCoord + distance) *i;
-        }
-        return CPCoord;
-
-    }
+    void  applyMove(Cubie mutare);
+    
+    void  multiply(Cubie mul);
     
 
-    int getEPCoord()
-    {
-        int EPCoord = 0;
-        for (int i = Edges::BR; i >= Edges::UR; i--)
-        {
-            int distance = 0;
 
-            for (int j = i - 1; j >= Edges::UR; j--)
-            {
-                if (EdgePermutation[j] > EdgePermutation[i])
-                    distance++;
-            }
-            EPCoord += (EPCoord + distance) * i;
-        }
-        return EPCoord;
-
-    }
-
-
-
-    void setTwistCoord(int twistToUnpack) {
-        int paritySum = 0;
-        
-        for (int t = DRB; t > URF; t--) {
-            CornerOrientation[t] = twistToUnpack % 3;
-            paritySum += CornerOrientation[t];
-            twistToUnpack /= 3;
-        }
-      
-        CornerOrientation[URF] = (3 - (paritySum % 3)) % 3;
-    }
-
-    void setFlipCoord(int FlipToUnpack) {
-        int paritySum = 0;
-        
-        for (int t = BR; t > UR; t--) {
-            EdgeOrientation[t] = FlipToUnpack % 2;
-            paritySum += EdgeOrientation[t];
-            FlipToUnpack /= 2;
-        }
-      
-        EdgeOrientation[UR] = (2 - (paritySum % 2)) % 2;
-    }
 
    
-        void setUDSliceCoord(int index) {
-            int k = 3;
 
-           
-            int sliceEdges[4] = { FR, FL, BL, BR }; 
-            int otherEdges[8] = { UR, UF, UL, UB, DR, DF, DL, DB }; 
+    int getTwistCoord();
 
-            int sliceIdx = 0;
-            int otherIdx = 0;
-
-         
-            for (int i = 11; i >= 0; i--) {
-                int comb = combinations(i, k);
-
-                if (index - comb >= 0) {
-                    
-                    EdgePermutation[i] = otherEdges[otherIdx++];
-                    index -= comb;
-                }
-                else {
-                    
-                    EdgePermutation[i] = sliceEdges[sliceIdx++];
-                    k--;
-                }
-            }
-        }
-        void setCPCoord(int CPtoUnpack)
-        {
-            int TempCornerPermutation[8];
-            TempCornerPermutation[0] = 0;
-
-            for (int i = 1; i <=7; i++)
-            {
-                TempCornerPermutation[i] = CPtoUnpack % (i + 1);
-                CPtoUnpack = CPtoUnpack / (i + 1);
+    int getFlipCoord();
 
 
-            }
+   
+    int combinations(int n, int k);
 
-            for (int i = 7; i >= 0; i--) {
-                CornerPermutation[i] = TempCornerPermutation[i];
+    int getUDSliceCoord();
 
-               
-                for (int j = i + 1; j < 8; j++) {
-                    if (CornerPermutation[j] >= CornerPermutation[i]) {
-                        CornerPermutation[j]++;
-                    }
-                }
-            }
-        }
+    int factorial(int n);
 
-        void setEPCoord(int EPtoUnpack)
-        {
-            int TempEdgePermutation[8];
-            TempEdgePermutation[0] = 0;
+    int getCPCoord();
+    
 
-            for (int i = 1; i <= 11; i++)
-            {
-                TempEdgePermutation[i] = EPtoUnpack % (i + 1);
-                EPtoUnpack = EPtoUnpack / (i + 1);
+    int getEPCoord();
 
 
-            }
-
-            for (int i = 11; i >= 0; i--) {
-                EdgePermutation[i] = TempEdgePermutation[i];
+    int getUDSlicePhase2Coord();
+    
 
 
-                for (int j = i + 1; j < 12; j++) {
-                    if (EdgePermutation[j] >= EdgePermutation[i]) {
-                        EdgePermutation[j]++;
-                    }
-                }
-            }
-        }
+
+    void setTwistCoord(int twistToUnpack);
+
+    void setFlipCoord(int FlipToUnpack);
+
+    void setCPCoord(int CPtoUnpack);
+   
+    void setUDSliceCoord(int index);
+
+    void setEPCoord(int EPtoUnpack);
+
+    void setUDSlicePhase2Coord(int UDMidPhase2ToUnpack);
+
+    void setUDSliceRestPhase2Coord(int UDSliceRestToUnpack);
+
+    
+
+     
+
+
+
+    //    var j, k, s, x: Integer; i, e: Edge; arr: array[0..3] of Edge;
+    //    begin
+    //        j : = 0;
+    //    for i: = UR to BR do
+    //        begin
+    //        e : = PEdge ^ [i].e;
+    //    if (e = FR) or (e = FL) or (e = BL) or (e = BR) then begin arr[j]: = e; Inc(j); end;
+    //    end; kociemba site
+
+    //x: = 0;
+    //    for j: = 3 downto 1 do
+    //        begin
+    //        s : = 0;
+    //    for k: = j - 1 downto 0 do
+    //        begin
+    //        if arr[k] > arr[j] then Inc(s);
+    //    end;
+    //x: = (x + s) * j;
+    //    end;
+    //Result: = UDSliceCoord * 24 + x;
+    //    end;
+
+
+
 
 
 };

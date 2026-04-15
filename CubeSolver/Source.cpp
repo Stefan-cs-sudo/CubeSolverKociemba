@@ -7,10 +7,11 @@
 #include "CubieCube.h"
 #include "CoordCube.h"
 #include "Search.h"
+#define _CRT_SECURE_NO_WARNINGS
 #include "Tables.h"
 using namespace std;
 
-// #include <omp.h> // Pentru multithreading mai târziu
+// #include <omp.h> 
 
 int main() {
    ifstream inputFile("input.txt");
@@ -30,22 +31,25 @@ int main() {
             scrambledCubes.push_back(line);
         }
     }
-    Tables tabele();
+    Tables tabele;
 
   
-    FaceCube StringtoFacelets();
+    FaceCube StringtoCubie;
+    Search Solver;
 
-    // Vom salva solu?iile aici pentru a le scrie în ordine la final
+    
    vector<string> solutions(scrambledCubes.size());
 
-    // 2. MAGIC TRICK: Aceast? linie paralelizeaz? bucla for pe toate nucleele procesorului!
+    
     // #pragma omp parallel for
     for (int i = 0; i < scrambledCubes.size(); ++i) {
+
+        StringtoCubie.Facelets(scrambledCubes[i]);
         // Aici vei apela algoritmul t?u pentru fiecare cub
         // solutions[i] = Solver::solve(cubes[i]); 
-
+        Solver.solve(StringtoCubie.toCubieCube());
         // Temporar punem un text de test
-        solutions[i] = "U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2";
+        solutions[i] = "";
     }
 
     // 3. Scriem solu?iile în ordine în fi?ier
