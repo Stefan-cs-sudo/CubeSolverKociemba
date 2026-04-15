@@ -570,57 +570,40 @@ int Cubie::getUDSliceCoord() {
     return UDSliceCoord;
 }
 
-
-int Cubie::getCPCoord()
-{
-    int CPCoord = 0;
-    for (int i = Corners::DRB; i > Corners::URF; i--)
-    {
-        int distance = 0;
-
-        for (int j = i - 1; j >= Corners::URF; j--)
-        {
-            if (CornerPermutation[j] > CornerPermutation[i])
-                distance++;
+int Cubie::getCPCoord() {
+    int cp = 0;
+    for (int i = 0; i < 7; i++) {
+        int d = 0;
+        for (int j = i + 1; j < 8; j++) {
+            if (CornerPermutation[j] < CornerPermutation[i]) d++;
         }
-        CPCoord = (CPCoord + distance) * i;
+        cp = cp * (8 - i) + d;
     }
- 
-    return CPCoord;
-
+    return cp;
 }
-
-int Cubie::getEPCoord()
-{
-    int EPCoord = 0;
-    for (int i = Edges::DB; i > Edges::UR; i--)
-    {
-        int distance = 0;
-
-        for (int j = i - 1; j >= Edges::UR; j--)
-        {
-            if (EdgePermutation[j] > EdgePermutation[i])
-                distance++;
+int Cubie::getEPCoord() {
+    int ep = 0;
+    // Ne uitam doar la primele 8 muchii
+    for (int i = 0; i < 7; i++) {
+        int d = 0;
+        for (int j = i + 1; j < 8; j++) {
+            if (EdgePermutation[j] < EdgePermutation[i]) d++;
         }
-        EPCoord = (EPCoord + distance) * i;
+        ep = ep * (8 - i) + d;
     }
-    return EPCoord;
-
+    return ep;
 }
-int Cubie::getUDSlicePhase2Coord()
-{
+int Cubie::getUDSlicePhase2Coord() {
+    // take the 4 slice edges in positions 8..11 (FR, FL, BL, BR)
+    int arr[4];
+    for (int i = 0; i < 4; i++) arr[i] = EdgePermutation[8 + i] - 8; // map 8..11 -> 0..3
+
+    // Lehmer code for 4 elements => 0..23
     int x = 0;
-
-    for (int j = BR; j > FR; j--) {
+    for (int i = 0; i < 4; i++) {
         int s = 0;
-
-        for (int k = j - 1; k >= FR; k--) {
-            if (EdgePermutation[k] > EdgePermutation[j]) {
-                s++;
-            }
-        }
-
-        x = (x + s) * (j - FR);
+        for (int j = i + 1; j < 4; j++) if (arr[j] < arr[i]) s++;
+        x = x * (4 - i) + s;
     }
     return x;
 }
@@ -632,6 +615,7 @@ void Cubie::setTwistCoord(int twist) {
         twist /= 3;
     }
     CornerOrientation[7] = (3 - parity % 3) % 3; 
+    
 }
 
 
@@ -643,6 +627,7 @@ void Cubie::setFlipCoord(int flip) {
         flip /= 2;
     }
     EdgeOrientation[11] = (2 - parity % 2) % 2; 
+   
 }
 
 void Cubie::setUDSliceCoord(int index) {
@@ -663,83 +648,56 @@ void Cubie::setUDSliceCoord(int index) {
             k--;
         }
     }
+  
 }
 
-
-void Cubie::setCPCoord(int CPtoUnpack)
-{
-    int TempCornerPermutation[8];
-    TempCornerPermutation[0] = 0;
-
-    for (int i = 1; i <= 7; i++)
-    {
-        TempCornerPermutation[i] = CPtoUnpack % (i + 1);
-        CPtoUnpack = CPtoUnpack / (i + 1);
-
-
+void Cubie::setCPCoord(int cp) {
+    int arr[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+    int fact[8] = { 1, 1, 2, 6, 24, 120, 720, 5040 };
+    for (int i = 0; i < 7; i++) {
+        int d = cp / fact[7 - i];
+        cp %= fact[7 - i];
+        CornerPermutation[i] = arr[d];
+        for (int j = d; j < 7 - i; j++) arr[j] = arr[j + 1];
     }
-
-    for (int i = 7; i >= 0; i--) {
-        CornerPermutation[i] = TempCornerPermutation[i];
-
-
-        for (int j = i + 1; j < 8; j++) {
-            if (CornerPermutation[j] >= CornerPermutation[i]) {
-                CornerPermutation[j]++;
-            }
-        }
-    }
+    CornerPermutation[7] = arr[0];
 }
-void Cubie::setEPCoord(int EPtoUnpack)
-{
-    int TempEdgePermutation[12];
-    TempEdgePermutation[0] = 0;
 
-    for (int i = 1; i <= 11; i++)
-    {
-        TempEdgePermutation[i] = EPtoUnpack % (i + 1);
-        EPtoUnpack = EPtoUnpack / (i + 1);
-
-
+void Cubie::setEPCoord(int ep) {
+    int arr[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+    int fact[8] = { 1, 1, 2, 6, 24, 120, 720, 5040 };
+    for (int i = 0; i < 7; i++) {
+        int d = ep / fact[7 - i];
+        ep %= fact[7 - i];
+        EdgePermutation[i] = arr[d];
+        for (int j = d; j < 7 - i; j++) arr[j] = arr[j + 1];
     }
+    EdgePermutation[7] = arr[0];
 
-    for (int i = 11; i >= 0; i--) {
-        EdgePermutation[i] = TempEdgePermutation[i];
-
-
-        for (int j = i + 1; j < 12; j++) {
-            if (EdgePermutation[j] >= EdgePermutation[i]) {
-                EdgePermutation[j]++;
-            }
-        }
-    }
+    // Restul de 4 muchii (Middle slice) raman la locul lor
+    EdgePermutation[8] = 8;
+    EdgePermutation[9] = 9;
+    EdgePermutation[10] = 10;
+    EdgePermutation[11] = 11;
 }
-void Cubie::setUDSlicePhase2Coord(int UDMidPhase2ToUnpack)
-{
+static void setPermutationFromIndex4(int idx, int out[4]) {
+    int elems[4] = { 0,1,2,3 };
+    for (int i = 0; i < 4; i++) {
+        int fact = 1;
+        for (int k = 2; k <= (3 - i); k++) fact *= k; // (3-i)!
+        int pos = idx / fact;
+        idx %= fact;
 
-    int tempSlice[4];
-    tempSlice[0] = 0;
-
-
-    for (int i = 1; i <= 3; i++) {
-        tempSlice[i] = UDMidPhase2ToUnpack % (i + 1);
-        UDMidPhase2ToUnpack /= (i + 1);
-    }
-
-
-    for (int i = 3; i >= 0; i--) {
-
-        EdgePermutation[i + 8] = tempSlice[i] + 8;
-
-
-        for (int j = i + 1; j < 4; j++) {
-            if (EdgePermutation[j + 8] >= EdgePermutation[i + 8]) {
-                EdgePermutation[j + 8]++;
-            }
-        }
+        out[i] = elems[pos];
+        for (int j = pos; j < 3 - i; j++) elems[j] = elems[j + 1];
     }
 }
 
+void Cubie::setUDSlicePhase2Coord(int idx) {
+    int perm[4];
+    setPermutationFromIndex4(idx, perm);
+    for (int i = 0; i < 4; i++) EdgePermutation[8 + i] = perm[i] + 8;
+}
 void Cubie::setUDSliceRestPhase2Coord(int UDSliceRestToUnpack)
 {
     int tempEP[8] = { 0 }   ;

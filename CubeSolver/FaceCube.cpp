@@ -6,89 +6,28 @@
 #include <stdexcept>
 
 
-
-void FaceCube::Facelets(const std::string& net)
-{
-    if (net.size() != 54) {
-        throw std::runtime_error("Input invalid: trebuie exact 54 caractere (net2D).");
+void FaceCube::Facelets(const std::string& urfdlbStr) {
+    if (urfdlbStr.size() != 54) {
+        throw std::runtime_error("Eroare: Cubul nu are 54 de caractere!");
     }
 
-    // net layout:
-    // U: [0..8]
-    // middle: [9..44] 3 rows x 12 cols, with faces per row: L F R B (each 3 cols)
-    // D: [45..53]
-    auto mid = [&](int r, int c) { return 9 + r * 12 + c; };
+    // Extragem centrele fixe ale cubului (indicii 4, 13, 22, 31, 40, 49)
+    char colorU = urfdlbStr[4];
+    char colorR = urfdlbStr[13];
+    char colorF = urfdlbStr[22];
+    char colorD = urfdlbStr[31];
+    char colorL = urfdlbStr[40];
+    char colorB = urfdlbStr[49];
 
-    // Construim un buffer "raw" în ordinea Kociemba URFDLB,
-    // dar cu caracterele de culoare din input (W/Y/R/O/B/G).
-    char raw[54];
-
-    // U -> raw[0..8]
-    for (int i = 0; i < 9; i++) raw[i] = net[i];
-
-    // R -> raw[9..17]  (în net, R este al 3-lea bloc de 3 coloane: col 6..8)
-    {
-        int k = 9;
-        for (int r = 0; r < 3; r++)
-            for (int c = 6; c < 9; c++)
-                raw[k++] = net[mid(r, c)];
-    }
-
-    // F -> raw[18..26] (în net, F este al 2-lea bloc: col 3..5)
-    {
-        int k = 18;
-        for (int r = 0; r < 3; r++)
-            for (int c = 3; c < 6; c++)
-                raw[k++] = net[mid(r, c)];
-    }
-
-    // D -> raw[27..35]
-    for (int i = 0; i < 9; i++) raw[27 + i] = net[45 + i];
-
-    // L -> raw[36..44] (în net, L este primul bloc: col 0..2)
-    {
-        int k = 36;
-        for (int r = 0; r < 3; r++)
-            for (int c = 0; c < 3; c++)
-                raw[k++] = net[mid(r, c)];
-    }
-
-    // B -> raw[45..53] (în net, B este ultimul bloc: col 9..11)
-    // Ai zis c? NU e rotit?, deci citim normal.
-    {
-        int k = 45;
-        for (int r = 0; r < 3; r++)
-            for (int c = 9; c < 12; c++)
-                raw[k++] = net[mid(r, c)];
-    }
-
-    // Acum centrele sunt în pozi?iile Kociemba standard:
-    // U center raw[4], R center raw[13], F center raw[22], D center raw[31], L center raw[40], B center raw[49]
-    char colorU = raw[4];
-    char colorR = raw[13];
-    char colorF = raw[22];
-    char colorD = raw[31];
-    char colorL = raw[40];
-    char colorB = raw[49];
-
-    // Convertim culorile in litere U/R/F/D/L/B in facelets[] (tot URFDLB indices)
     for (int i = 0; i < 54; i++) {
-        if (raw[i] == colorU) facelets[i] = 'U';
-        else if (raw[i] == colorR) facelets[i] = 'R';
-        else if (raw[i] == colorF) facelets[i] = 'F';
-        else if (raw[i] == colorD) facelets[i] = 'D';
-        else if (raw[i] == colorL) facelets[i] = 'L';
-        else if (raw[i] == colorB) facelets[i] = 'B';
-        else{
-         std::string msg = "Culoare necunoscuta la i=" + std::to_string(i) +
-                      " raw[i]='" + std::string(1, raw[i]) + "'" +
-                      " centre(U,R,F,D,L,B)=(" + std::string(1,colorU) + "," +
-                                                std::string(1,colorR) + "," +
-                                                std::string(1,colorF) + "," +
-                                                std::string(1,colorD) + "," +
-                                                std::string(1,colorL) + "," +
-                                                std::string(1,colorB) + ")";
-                    throw std::runtime_error(msg);
+        if (urfdlbStr[i] == colorU) facelets[i] = 'U';
+        else if (urfdlbStr[i] == colorR) facelets[i] = 'R';
+        else if (urfdlbStr[i] == colorF) facelets[i] = 'F';
+        else if (urfdlbStr[i] == colorD) facelets[i] = 'D';
+        else if (urfdlbStr[i] == colorL) facelets[i] = 'L';
+        else if (urfdlbStr[i] == colorB) facelets[i] = 'B';
+        else {
+            throw std::runtime_error("Culoare necunoscuta pe cub!");
         }
     }
 }

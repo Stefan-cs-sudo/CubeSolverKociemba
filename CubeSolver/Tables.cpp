@@ -45,11 +45,7 @@ Tables::Tables()
 		cout << "Tabelele au fost incarcate cu succes din fisier!\n";
 	}
 	else {
-		cout << "Nu s-au gasit tabelele necesare pentru rezolvarea rapida.\n";
-		cout << "Vrei sa se genereze tabele noi? (Y/N)\n";
-		string answer;
-		cin >> answer;
-		if (answer == "y" || answer == "Y") {
+		
 			BuildingTables(); 
 
 			FILE* file = fopen("kociemba_tables.bin", "wb");
@@ -67,8 +63,13 @@ Tables::Tables()
 				fwrite(Slice_EP_Prun.data(), sizeof(uint8_t), Slice_EP_Prun.size(), file);
 				fclose(file);
 			}
-		}
+	
 	}
+	std::cout << "Slice_Twist_Prun size=" << Tables::Slice_Twist_Prun.size() << "\n";
+	std::cout << "Slice_Flip_Prun size=" << Tables::Slice_Flip_Prun.size() << "\n";
+	std::cout << "Twist_Flip_Prun size=" << Tables::Twist_Flip_Prun.size() << "\n";
+	std::cout << "Slice_CP_Prun size=" << Tables::Slice_CP_Prun.size() << "\n";
+	std::cout << "Slice_EP_Prun size=" << Tables::Slice_EP_Prun.size() << "\n";
 }
 
 void Tables::BuildTwistMove() {
@@ -265,22 +266,21 @@ void Tables::BuildTwist_Flip_Prun()
 	}
 }
 
-void Tables::BuildUDSlicePhase2Move()
-{
-	UDSlicePhase2Move.resize(24 * 18);
-	
+void Tables::BuildUDSlicePhase2Move() {
+	UDSlicePhase2Move.assign(24 * 18, 0);
+
+	int phase2Moves[10] = { U1,U2,U3, D1,D2,D3, R2,L2,F2,B2 };
 
 	for (int i = 0; i < 24; i++) {
-		for (int m = 0; m < 18; m++) { 
+		for (int k = 0; k < 10; k++) {
+			int m = phase2Moves[k];
 			Cubie cub;
 			cub.setUDSlicePhase2Coord(i);
 			cub.applyMove(Cubie::Mutari[m]);
-			UDSlicePhase2Move[18 * i + m] = cub.getUDSlicePhase2Coord();
+			UDSlicePhase2Move[i * 18 + m] = cub.getUDSlicePhase2Coord();
 		}
 	}
-
-}
-void Tables::BuildSlice_CP_Prun()
+}void Tables::BuildSlice_CP_Prun()
 {
 	const int totalStates = 40320 * 24;
 

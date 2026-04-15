@@ -91,41 +91,48 @@ static inline bool isPhase2Move(int m) {
         m == D1 || m == D2 || m == D3 ||
         m == R2 || m == L2 || m == F2 || m == B2);
 }
-std::string Search::solve(CoordCube cc) {
+std::string Search::solve(Cubie start) {
+    startCube = start;
     currentPath.clear();
 
-    twistS[0] = cc.twist;
-    flipS[0] = cc.flip;
-    sliceS[0] = cc.udslice;
-    cpS[0] = cc.cp;
-    epS[0] = cc.ep;
-    slice2S[0] = cc.udslicePhase2;
+    twistS[0] = start.getTwistCoord();
+    flipS[0] = start.getFlipCoord();
+    sliceS[0] = start.getUDSliceCoord();
 
     int initialDist = std::max({
         (int)Tables::Slice_Twist_Prun[sliceS[0] * 2187 + twistS[0]],
         (int)Tables::Slice_Flip_Prun[sliceS[0] * 2048 + flipS[0]],
         (int)Tables::Twist_Flip_Prun[twistS[0] * 2048 + flipS[0]]
         });
-    std::cout << "Start solve, initialDist=" << initialDist << "\n";
-    for (int depth = initialDist; depth <= 12; depth++) {
-        nodes1 = 0;
-        nodes2 = 0;
-        std::cout << "Incerc depth=" << depth << "\n";
-        if (searchPhase1(0, depth, -1, -1)) {
-            // currentPath conține Phase1 + Phase2 (pentru că phase2 face push în același vector)
-            return pathToAlgorithm(currentPath);
+
+    for (int total = initialDist; total <= 30; total++) {
+        int d1min = initialDist;
+        int d1max = std::min(12, total);
+
+        for (int d1 = d1min; d1 <= d1max; d1++) {
+            int d2 = total - d1;
+            if (d2 < 0 || d2 > 18) continue;
+
+            nodes1 = 0; nodes2 = 0;
+            phase2MaxDepth = d2;
+            currentPath.clear();
+
+            if (searchPhase1(0, d1, -1, -1)) {
+                return pathToAlgorithm(currentPath);
+            }
         }
     }
 
-    return "Error: no solution found (depth<=12)";
+    return "Error: no solution found (totalDepth<=30)";
 }
+
 bool Search::searchPhase1(int depth, int depthToGoal, int lastMove, int prevMove) {
     nodes1++;
 
     int twist = twistS[depth];
     int flip = flipS[depth];
     int slice = sliceS[depth];
-    
+
     int h = std::max({
         (int)Tables::Slice_Twist_Prun[slice * 2187 + twist],
         (int)Tables::Slice_Flip_Prun[slice * 2048 + flip],
@@ -133,31 +140,37 @@ bool Search::searchPhase1(int depth, int depthToGoal, int lastMove, int prevMove
         });
     if (h > depthToGoal) return false;
 
-    // dacă am ajuns în G1 (Phase1 goal), încercăm Phase2
+    // Am ajuns in G1 (Phase1 goal)
     if (slice == 0 && twist == 0 && flip == 0) {
-        int slice2 = slice2S[depth];
-        int cp = cpS[depth];
-        int ep = epS[depth];
+        if (depthToGoal != 0) return false; // Trebuie sa respectam exact d1
+
+        // RECONSTRUIM CUBUL REAL PENTRU COORDONATE PHASE 2
+        Cubie realCube = startCube;
+        for (int move : currentPath) {
+            realCube.applyMove(Cubie::Mutari[move]);
+        }
+
+        int cp = realCube.getCPCoord();
+        int ep = realCube.getEPCoord();
+        int slice2 = realCube.getUDSlicePhase2Coord();
 
         int h2 = std::max(
             (int)Tables::Slice_CP_Prun[slice2 * 40320 + cp],
             (int)Tables::Slice_EP_Prun[slice2 * 40320 + ep]
         );
 
-        // Phase2 trebuie să încapă în pașii rămași din Phase1 (depthToGoal)
-        // aici noi tratăm depthToGoal ca "câți pași mai ai voie în Phase1 până la limita curentă"
-        if (h2 > depthToGoal) return false;
-
-        // IMPORTANT:
-        // dacă depthToGoal > 0 și ești deja în G1, nu mai extinde Phase1.
-        // return false și lasă IDDFS să găsească altă intrare în G1 la lungimea potrivită.
-        if (depthToGoal != 0) return false;
-
-        // depthToGoal == 0: rulează Phase2
-        for (int d2 = h2; d2 <= 18; d2++) {
-            if (searchPhase2(depth, d2, -1)) return true;
+        if (phase2MaxDepth == 0) {
+            return (cp == 0 && ep == 0 && slice2 == 0);
         }
-        return false;
+
+        if (h2 > phase2MaxDepth) return false;
+
+        // Punem coordonatele reale ca sa le poata prelua Phase 2
+        cpS[depth] = cp;
+        epS[depth] = ep;
+        slice2S[depth] = slice2;
+
+        return searchPhase2(depth, phase2MaxDepth, -1);
     }
 
     if (depthToGoal == 0) return false;
@@ -166,21 +179,11 @@ bool Search::searchPhase1(int depth, int depthToGoal, int lastMove, int prevMove
         if (pruneMove2(prevMove, lastMove, m)) continue;
 
         int nd = depth + 1;
-
         twistS[nd] = Tables::TwistMove[twist * 18 + m];
         flipS[nd] = Tables::FlipMove[flip * 18 + m];
         sliceS[nd] = Tables::UDSliceMove[slice * 18 + m];
 
-        if (isPhase2Move(m)) {
-            cpS[nd] = Tables::CPMove[cpS[depth] * 18 + m];
-            epS[nd] = Tables::EPMove[epS[depth] * 18 + m];
-            slice2S[nd] = Tables::UDSlicePhase2Move[slice2S[depth] * 18 + m];
-        }
-        else {
-            cpS[nd] = cpS[depth];
-            epS[nd] = epS[depth];
-            slice2S[nd] = slice2S[depth];
-        }
+        // FARA cp/ep/slice2 false aici.
 
         currentPath.push_back(m);
         if (searchPhase1(nd, depthToGoal - 1, m, lastMove)) return true;

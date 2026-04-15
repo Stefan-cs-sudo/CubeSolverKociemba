@@ -1,12 +1,9 @@
 #pragma once
 #include <iostream>
-#include <fstream>
 #include <string>
-
 #include <vector>
-#include <filesystem>
 #include "CubieCube.h"
-#include"Tables.h"
+#include "Tables.h"
 #include "Constants.h"
 using namespace std;
 
@@ -18,8 +15,11 @@ class Search {
     int twistS[MAXD], flipS[MAXD], sliceS[MAXD];
     int cpS[MAXD], epS[MAXD], slice2S[MAXD];
 
+    int phase2MaxDepth = 0;
+    Cubie startCube; // Salvam cubul real de la inceput
+
 public:
-    string solve(CoordCube cc);
+    std::string solve(Cubie start); // Primeste Cubie in loc de CoordCube
 
 private:
     bool searchPhase1(int depth, int depthToGoal, int lastMove, int prevMove);

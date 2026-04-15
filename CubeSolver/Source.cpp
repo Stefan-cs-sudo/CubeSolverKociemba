@@ -10,6 +10,64 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Tables.h"
 using namespace std;
+std::string parseWenglorNet(const std::string& net) {
+    std::string urfdlb = "";
+    urfdlb.reserve(54);
+
+    // 1. U (Up) - primele 9 caractere (0-8)
+    urfdlb += net.substr(0, 9);
+
+    // 2. R (Right) - al 3-lea bloc de 3 din fiecare rand al panglicii (L, F, R, B)
+    for (int r = 0; r < 3; r++) urfdlb += net.substr(9 + r * 12 + 6, 3);
+
+    // 3. F (Front) - al 2-lea bloc de 3 din fiecare rand
+    for (int r = 0; r < 3; r++) urfdlb += net.substr(9 + r * 12 + 3, 3);
+
+    // 4. D (Down) - ultimele 9 caractere (45-53)
+    urfdlb += net.substr(45, 9);
+
+    // 5. L (Left) - primul bloc de 3 din fiecare rand
+    for (int r = 0; r < 3; r++) urfdlb += net.substr(9 + r * 12 + 0, 3);
+
+    // 6. B (Back) - al 4-lea bloc de 3 din fiecare rand
+    for (int r = 0; r < 3; r++) urfdlb += net.substr(9 + r * 12 + 9, 3);
+
+    return urfdlb;
+}
+static void selfTestCoords() {
+    for (int i = 0; i < 2187; i++) {
+        Cubie c;
+        c.setTwistCoord(i);
+        if (c.getTwistCoord() != i) {
+            std::cout << "Twist mismatch at " << i << "\n";
+            break;
+        }
+    }
+    for (int i = 0; i < 2048; i++) {
+        Cubie c;
+        c.setFlipCoord(i);
+        if (c.getFlipCoord() != i) {
+            std::cout << "Flip mismatch at " << i << "\n";
+            break;
+        }
+    }
+    for (int i = 0; i < 495; i++) {
+        Cubie c;
+        c.setUDSliceCoord(i);
+        if (c.getUDSliceCoord() != i) {
+            std::cout << "UDSlice mismatch at " << i << "\n";
+            break;
+        }
+    }
+    for (int i = 0; i < 24; i++) {
+        Cubie c;
+        c.setUDSlicePhase2Coord(i);
+        if (c.getUDSlicePhase2Coord() != i) {
+            std::cout << "UDSlicePhase2 mismatch at " << i << "\n";
+            break;
+        }
+    }
+}
 
 // #include <omp.h> 
 
@@ -34,19 +92,9 @@ int main() {
         }
     }
     Tables tabele;
-    {
-        Cubie solved;          // constructorul pune cubul rezolvat (permutări identitate, orientări 0)
-        CoordCube sc(solved);  // coordonate pentru starea rezolvată
+    
+    selfTestCoords(); // cel pe care l-ai pus deja
 
-        cout << "SOLVED coords: "
-            << "twist=" << sc.twist
-            << " flip=" << sc.flip
-            << " udslice=" << sc.udslice
-            << " cp=" << sc.cp
-            << " ep=" << sc.ep
-            << " udslicePhase2=" << sc.udslicePhase2
-            << "\n";
-    }
     FaceCube StringtoCubie;
     Search Solver;
 
@@ -58,9 +106,17 @@ int main() {
     for (int i = 0; i < (int)scrambledCubes.size(); ++i) {
         try {
             if (scrambledCubes[i].size() != 54) {
-                std::cerr << "Linie invalida: cube " << i << " are " << scrambledCubes[i].size() << " caractere\n";
+                std::cerr << "Linie invalida la " << i << "\n";
+                continue;
             }
-            StringtoCubie.Facelets(scrambledCubes[i]);
+
+            // 1. Traducem din Wenglor (panglica) in standard Kociemba
+            std::string urfdlbFormat = parseWenglorNet(scrambledCubes[i]);
+
+            // 2. Mapeaza fetele
+            StringtoCubie.Facelets(urfdlbFormat);
+
+            // 3. Rezolva
             std::string sol = Solver.solve(StringtoCubie.toCubieCube());
             solutions[i] = sol;
 
@@ -68,10 +124,7 @@ int main() {
             std::cout << "Solutie: " << sol << "\n";
         }
         catch (const std::exception& e) {
-            std::cerr << "Eroare la cube " << i
-                << " (len=" << scrambledCubes[i].size() << "): "
-                << e.what() << "\n";
-            // optional: continua la urmatorul
+            std::cerr << "Eroare la cube " << i << ": " << e.what() << "\n";
             solutions[i] = "ERROR";
         }
     }
