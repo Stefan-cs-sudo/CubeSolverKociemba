@@ -9,7 +9,7 @@ static inline void assertCoordCube(const CoordCube& s) {
     assert(0 <= s.cp && s.cp < 40320);
     assert(0 <= s.ep && s.ep < 40320);
     assert(0 <= s.udslice && s.udslice < 495);
-    assert(0 <= s.twist && s.twist < 2187);
+    assert(0 <= s.twist && s.twist < 2187);a
     assert(0 <= s.flip && s.flip < 2048);
     assert(0 <= s.udslicePhase2 && s.udslicePhase2 < 24);
 }

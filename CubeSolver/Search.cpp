@@ -169,23 +169,34 @@ bool Search::searchPhase1(int depth, int depthToGoal, int lastMove, int prevMove
     }
 
     if (depthToGoal == 0) return false;
+
+    // 1. Extragem matematica constanta
     int twistBase = twist * 18;
     int flipBase = flip * 18;
     int sliceBase = slice * 18;
-    int targetDepth = depthToGoal - 1; 
+    int targetDepth = depthToGoal - 1;
 
+    // Structura usoara pe stiva pentru a memora mutarile valide
+    struct MoveEval {
+        int m;
+        int h;
+        int n_twist;
+        int n_flip;
+        int n_slice;
+    };
+    MoveEval movesToTry[18];
+    int validMovesCount = 0;
+
+    // 2. Colectam DOAR mutarile valide si calculam heuristica lor
     for (int m = 0; m < 18; m++) {
         if (pruneMove2(prevMove, lastMove, m)) continue;
 
-        // Calculam mai intai doar twist si flip
         int n_twist = Tables::TwistMove[twistBase + m];
         int n_flip = Tables::FlipMove[flipBase + m];
 
-        // 2. SHORT-CIRCUIT: Verificam cel mai restrictiv tabel PRIMUL
         int p3 = Tables::Twist_Flip_Prun[n_twist * 2048 + n_flip];
-        if (p3 > targetDepth) continue; // Daca p3 e prea mare, taiem ramura INSTANT! Fara sa mai atingem p1, p2 sau slice!
+        if (p3 > targetDepth) continue;
 
-        // Daca a supravietuit lui p3, abia acum calculam slice si verificam restul
         int n_slice = Tables::UDSliceMove[sliceBase + m];
 
         int p1 = Tables::Slice_Twist_Prun[n_slice * 2187 + n_twist];
@@ -194,14 +205,35 @@ bool Search::searchPhase1(int depth, int depthToGoal, int lastMove, int prevMove
         int p2 = Tables::Slice_Flip_Prun[n_slice * 2048 + n_flip];
         if (p2 > targetDepth) continue;
 
-        // 3. Mutarea este complet valida! Continuam in adancime
-        int nd = depth + 1;
-        twistS[nd] = n_twist;
-        flipS[nd] = n_flip;
-        sliceS[nd] = n_slice;
+        int h_next = p1 > p2 ? (p1 > p3 ? p1 : p3) : (p2 > p3 ? p2 : p3);
 
-        currentPath[path_len++] = m;
-        if (searchPhase1(nd, targetDepth, m, lastMove)) return true;
+        // Salvam mutarea in lista noastra
+        movesToTry[validMovesCount++] = { m, h_next, n_twist, n_flip, n_slice };
+    }
+
+    // 3. MOVE ORDERING (Insertion Sort ultra-rapid pentru array-uri mici)
+    // Sortam mutarile crescator dupa heuristica 'h'
+    for (int i = 1; i < validMovesCount; i++) {
+        MoveEval key = movesToTry[i];
+        int j = i - 1;
+        while (j >= 0 && movesToTry[j].h > key.h) {
+            movesToTry[j + 1] = movesToTry[j];
+            j--;
+        }
+        movesToTry[j + 1] = key;
+    }
+
+    // 4. Executam recursivitatea in ordinea optima!
+    int nd = depth + 1;
+    for (int i = 0; i < validMovesCount; i++) {
+        twistS[nd] = movesToTry[i].n_twist;
+        flipS[nd] = movesToTry[i].n_flip;
+        sliceS[nd] = movesToTry[i].n_slice;
+
+        currentPath[path_len++] = movesToTry[i].m;
+
+        if (searchPhase1(nd, targetDepth, movesToTry[i].m, lastMove)) return true;
+
         path_len--;
     }
 

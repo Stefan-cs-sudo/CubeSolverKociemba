@@ -40,6 +40,7 @@ std::string parseWenglorNet(const std::string& net) {
 
 
 int main() {
+    
     Cubie initHelper;
     initHelper.initMoves();
 
