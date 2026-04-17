@@ -1,64 +1,43 @@
-#define _CRT_SECURE_NO_WARNINGS
 #pragma once
-#include <iostream>
-#include <fstream>
-#include <string>
-
 #include <vector>
-#include <filesystem>
+#include <cstdint>
 #include "CubieCube.h"
 #include "Constants.h"
-using namespace std;
-class Cubie; 
-class CoordCube;
+#include <array> 
 
-
+class Cubie;
 
 class Tables {
 public:
-	inline static vector<uint16_t > TwistMove;
+    inline static std::array<uint16_t, 2187 * 18> TwistMove;
+    inline static std::array<uint16_t, 2048 * 18> FlipMove;
+    inline static std::array<uint16_t, 495 * 18> UDSliceMove;
+    inline static std::array<uint16_t, 40320 * 18> CPMove;
+    inline static std::array<uint16_t, 40320 * 18> EPMove;
+    inline static std::array<uint16_t, 24 * 18> UDSlicePhase2Move;
 
-	inline static vector<uint16_t > FlipMove;
+    
+    inline static std::array<uint8_t, 495 * 2187> Slice_Twist_Prun;
+    inline static std::array<uint8_t, 495 * 2048> Slice_Flip_Prun;
+    inline static std::array<uint8_t, 2187 * 2048> Twist_Flip_Prun;
+    inline static std::array<uint8_t, 40320 * 24> Slice_CP_Prun;
+    inline static std::array<uint8_t, 40320 * 24> Slice_EP_Prun;
 
-	inline static vector<uint16_t > UDSliceMove;
+  
 
-	inline static vector<uint16_t > CPMove;
+    static void init();
+    static void BuildTwistMove();
+    static void BuildFlipMove();
+    static void BuildUDSliceMove();
+    static void BuildCPMove();
+    static void BuildEPMove();
+    static  void BuildUDSlicePhase2Move();
 
-	inline static	vector<uint16_t >EPMove;
+    static void BuildSlice_Twist_Prun();
+    static void BuildSlice_Flip_Prun();
+    static void BuildTwist_Flip_Prun();
+    static void BuildSlice_CP_Prun();
+    static void BuildSlice_EP_Prun();
 
-
-	inline static vector<uint16_t  >UDSlicePhase2Move;
-
-	inline static std::vector<uint8_t> Slice_Twist_Prun; // size 495*2187
-	inline static std::vector<uint8_t> Slice_Flip_Prun;  // size 495*2048
-	inline static std::vector<uint8_t> Twist_Flip_Prun;  // size 2187*2048 (NEW)
-
-	inline static std::vector<uint8_t> Slice_CP_Prun;    // size 24*40320
-	inline static std::vector<uint8_t> Slice_EP_Prun;
-
-
-	Tables();
-	
-		void BuildTwistMove();
-	
-	void BuildFlipMove();
-	void BuildUDSliceMove();
-	
-	void BuildCPMove();
-	void BuildEPMove();
-	void BuildSlice_Twist_Prun();
-	void BuildSlice_Flip_Prun();
-	void BuildTwist_Flip_Prun(); 
-	
-
-	void BuildUDSlicePhase2Move();
-
-	void BuildSlice_CP_Prun();
-	void BuildSlice_EP_Prun();
-
-	void BuildingTables();
-		
-	
-
-
+    static void BuildingTables();
 };
