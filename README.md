@@ -8,6 +8,7 @@
 # Documentation
 The project includes documentation in Word format. To install/view it, click here: 
 
+https://github.com/Stefan-cs-sudo/CubeSolverKociemba/raw/refs/heads/master/CubeSolver%20(1).docx
 
 # Configuration and Execution
 To view or modify the code, open the .sln file. Upon compilation (Build), it will generate a new executable in the Release folder.
