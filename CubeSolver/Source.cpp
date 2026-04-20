@@ -10,10 +10,11 @@
 #include "Search.h"
 #include "Tables.h"
 
+
 using namespace std;
 
-std::string parseWenglorNet(const std::string& net) {
-    std::string urfdlb = "";
+string parseWenglorNet(const std::string& net) {
+    string urfdlb = "";
     urfdlb.reserve(54);
 
     urfdlb += net.substr(0, 9);
@@ -50,7 +51,7 @@ int main() {
 
     Tables::init();
     vector<string> solutions(scrambledCubes.size());
-    int solvedCount = 0;
+ 
 
 #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < (int)scrambledCubes.size(); ++i) {
@@ -70,7 +71,7 @@ int main() {
         }
 
 #pragma omp atomic
-        solvedCount++;
+      
 
      
     }
