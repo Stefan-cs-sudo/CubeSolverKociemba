@@ -1,6 +1,6 @@
 ## Rubik's Cube Kociemba Algorithm
  
-  Hello! This is my project for solving the two proposed tasks. The project combines the performance of parallel computing in C++ with a modern web interface for visualization.
+  Hello! This is my project for solving 10K scrambled cubes in the input inside CubeSolver. The project combines the performance of parallel computing in C++ with a smart and relatively efficient algorithm.
 
 <img width="1500" height="2000" alt="pozaCub" src="https://github.com/user-attachments/assets/4fc575da-ec1b-49c2-8ef9-fffda62e9052" />
 
